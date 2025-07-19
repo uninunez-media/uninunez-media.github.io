@@ -7,35 +7,39 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3/dist/js.cookie.min.js"></script>
   <link rel="stylesheet" href="https://ableplayer.github.io/ableplayer/build/ableplayer.min.css" />
+  <link rel="stylesheet" href="https://ableplayer.github.io/ableplayer/build/ableplayer-skins.css" />
+  <link rel="stylesheet" href="style.css">
   <script src="https://ableplayer.github.io/ableplayer/build/ableplayer.min.js"></script>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #fff;
-    }
-    #wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-    }
-  </style>
+
 </head>
 <body>
 <div id="wrapper">
-  <video id="player1" data-able-player width=800 heigth=600 preload="auto" poster="https://uninunez-media.github.io/Poster.png" src="https://uninunez-media.github.io/Recursos/Recursos.mp4" data-sign-src="https://uninunez-media.github.io/Recursos/Recursos_Signs.mp4">
+  <video
+    id="player1"
+    data-able-player
+    width=800
+    heigth=600
+    preload="auto"
+    poster="https://uninunez-media.github.io/Poster.png"
+    src="https://uninunez-media.github.io/Recursos/Recursos.mp4"
+    data-sign-src="https://uninunez-media.github.io/Recursos/Recursos_Signs.mp4"
+    data-sign-default="true"
+    data-transcript-default="true"
+  >
     <track kind="captions" src="https://uninunez-media.github.io/Recursos/Recursos_Captions.vtt" srclang="es" label="Español" default>
   </video>
 </div>
+<script>
+  $(document).on('ableplayer', function (e, player) {
+    // Forzar mostrar ventana de señas
+    if (typeof player.showSignWindow === 'function') {
+      player.showSignWindow();
+    }
+    // Forzar mostrar transcripción
+    if (typeof player.showTranscript === 'function') {
+      player.showTranscript();
+    }
+  });
+</script>
 </body>
 </html>
