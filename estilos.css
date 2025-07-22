@@ -15,14 +15,14 @@ div#wrapper {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 1280px;
-  max-width: 98%;
+  width: 1230px;
+  max-width: 100%;
   background: #fff;
   margin-top: 2rem;
 }
 #player {
   position: relative;
-  width: 100%;
+  width: 70%;
   transition: width 0.2s;
 }
 #player .able-sign-window {
