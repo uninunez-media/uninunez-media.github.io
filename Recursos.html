@@ -8,56 +8,9 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/js-cookie@3/dist/js.cookie.min.js"></script>
   <link rel="stylesheet" href="https://ableplayer.github.io/ableplayer/build/ableplayer.min.css" />
+  <link rel="stylesheet" href="estilos.css" />
   <script src="https://ableplayer.github.io/ableplayer/build/ableplayer.min.js"></script>
-  <style>
-    div#wrapper {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      width: 1280px;
-      max-width: 98%;
-      background: #fff;
-      margin-top: 2rem;
-    }
-
-    #player {
-      position: relative;
-      width: 100%;
-      border: #8b0505 solid 1px;
-      transition: width 0.2s;
-    }
-
-    #player .able-sign-window {
-      position: absolute !important;
-      left: calc(100% + 10px) !important;
-      top: 0px !important;
-      width: 30% !important;
-      z-index: 10000 !important;
-      margin: 0 !important;
-    }
-
-    #player .able-transcript-area {
-      position: absolute !important;
-      left: calc(100% + 10px) !important;
-      top: 34% !important;
-      width: 30% !important;
-      z-index: 10000 !important;
-      margin: 0 !important;
-      border: #1b8b05 solid 1px;
-      transition: top 0.2s;
-    }
-
-    @media (max-width: 900px) {
-      #player .able-sign-window,
-      #player .able-transcript-area {
-        position: static !important;
-        left: unset !important;
-        top: unset !important;
-        width: 100% !important;
-        margin-top: 10px !important;
-      }
-    }
-  </style>
+  <script src="ajustes-ableplayer.js"></script>
 </head>
 
 <body>
@@ -73,38 +26,6 @@
     </div>
 
   </div>
-
-  <script>
-    function adjustPanels() {
-      var $player = $('#player');
-      var $sign = $player.find('.able-sign-window');
-      var $transcript = $player.find('.able-transcript-area');
-      var signVisible = $sign.length && $sign.is(':visible');
-      var transcriptVisible = $transcript.length && $transcript.is(':visible');
-
-      // Ajustar top de transcript
-      if (!signVisible && transcriptVisible) {
-        $transcript.css('top', '0px');
-      } else {
-        $transcript.css('top', '34%');
-      }
-
-      // Ajustar ancho del player
-      if (!signVisible && !transcriptVisible) {
-        $player.css('width', '100%');
-      } else {
-        $player.css('width', '70%');
-      }
-    }
-
-    $(document).on('ableplayer', function () {
-      setTimeout(adjustPanels, 350);
-      // Reajustar cuando se muestra/oculta paneles
-      $(document).on('click', '.able-toolbar button', function () {
-        setTimeout(adjustPanels, 200);
-      });
-    });
-  </script>
 
 </body>
 
