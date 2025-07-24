@@ -19,14 +19,25 @@
       <video id="video1" data-able-player width="800" height="600" preload="auto"
         poster="https://uninunez-media.github.io/Poster.png"
         src="https://uninunez-media.github.io/Tools/Tools.mp4"
-        data-sign-src="https://uninunez-media.github.io/Tools/Tools_Signs.mp4" data-sign-default="true">
+        data-sign-src="https://uninunez-media.github.io/Tools/Tools_Signs.mp4" data-sign-default="true" >
         <track kind="captions" src="https://uninunez-media.github.io/Tools/Tools_Captions.vtt" srclang="es"
           label="Español" default>
       </video>
     </div>
 
   </div>
-
+<script>
+  $(document).ready(function () {
+    // Espera a que AblePlayer esté listo
+    $('#video1').on('ableplayer', function (e, player) {
+      // Activa la pista de señas si existe
+      if (player && typeof player.toggleSignWindow === 'function') {
+        player.toggleSignWindow(true); // true = mostrar ventana de señas
+      }
+    });
+  });
+</script>
 </body>
+
 
 </html>

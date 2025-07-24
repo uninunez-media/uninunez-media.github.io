@@ -1,5 +1,6 @@
 function adjustPanels() {
   var $player = $('#player');
+  var $wrapper = $('#wrapper');
   var $sign = $player.find('.able-sign-window');
   var $transcript = $player.find('.able-transcript-area');
   var signVisible = $sign.length && $sign.is(':visible');
@@ -15,8 +16,10 @@ function adjustPanels() {
   // Ajustar ancho del player
   if (!signVisible && !transcriptVisible) {
     $player.css('width', '100%');
+    $wrapper.addClass('center-player');
   } else {
     $player.css('width', '70%');
+    $wrapper.removeClass('center-player');
   }
 }
 

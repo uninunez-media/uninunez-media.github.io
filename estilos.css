@@ -19,6 +19,10 @@ div#wrapper {
   max-width: 100%;
   background: #fff;
   margin-top: 2rem;
+  justify-content: flex-start; /* por defecto a la izquierda */
+}
+#wrapper.center-player {
+  justify-content: center !important;
 }
 #player {
   position: relative;
@@ -43,6 +47,9 @@ div#wrapper {
   transition: top 0.2s;
 }
 @media (max-width: 900px) {
+  #player {
+    width: 100% !important;
+  }
   #player .able-sign-window,
   #player .able-transcript-area {
     position: static !important;
