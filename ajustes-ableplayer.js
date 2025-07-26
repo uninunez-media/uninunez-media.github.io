@@ -6,6 +6,13 @@ function adjustPanels() {
   var signVisible = $sign.length && $sign.is(':visible');
   var transcriptVisible = $transcript.length && $transcript.is(':visible');
 
+  // Ajustar ancho de #player según visibilidad de .able-sign-window
+  if (signVisible) {
+    $player.css('width', '60%');
+  } else {
+    $player.css('width', '100%');
+  }
+
   // Ajustar top de transcript
   if (!signVisible && transcriptVisible) {
     $transcript.css('top', '0px');
@@ -13,18 +20,10 @@ function adjustPanels() {
     $transcript.css('top', '34%');
   }
 
-  // Ajustar ancho del player
-  if (!signVisible && !transcriptVisible) {
-    $player.css('width', '100%');
-    $wrapper.addClass('center-player');
-  } else {
-    $player.css('width', '70%');
-    $wrapper.removeClass('center-player');
-  }
 }
 
 $(document).on('ableplayer', function () {
-  setTimeout(adjustPanels, 350);
+  setInter(adjustPanels, 350);
   // Reajustar cuando se muestra/oculta paneles
   $(document).on('click', '.able-toolbar button', function () {
     setTimeout(adjustPanels, 200);

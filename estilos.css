@@ -11,6 +11,8 @@ body {
   justify-content: center;
   align-items: flex-start;
 }
+
+
 div#wrapper {
   display: flex;
   flex-direction: row;
@@ -26,9 +28,10 @@ div#wrapper {
 }
 #player {
   position: relative;
-  width: 70%;
+  width: 100%;
   transition: width 0.2s;
 }
+
 #player .able-sign-window {
   position: absolute !important;
   left: calc(100% + 10px) !important;
@@ -37,6 +40,7 @@ div#wrapper {
   z-index: 10000 !important;
   margin: 0 !important;
 }
+
 #player .able-transcript-area {
   position: absolute !important;
   left: calc(100% + 10px) !important;
@@ -67,11 +71,5 @@ div#wrapper {
   }
 #transcript div.able-desc,
 #signs div.able-desc {
-  width: 90%;
+  width: 100%;
 }
-div#alternatives {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  width: 38%;
-  }
