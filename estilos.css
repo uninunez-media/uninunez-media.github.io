@@ -50,6 +50,11 @@ div#wrapper {
   margin: 0 !important;
   transition: top 0.2s;
 }
+
+#player .able-wrapper .able  :has(.able-sign-window) {
+  width: 50%;
+  height: 100%;
+}
 @media (max-width: 900px) {
   #player {
     width: 100% !important;
