@@ -57,7 +57,37 @@
     	div#col1 div.able-wrapper {
     		margin-top: 0;
     	}
-          
+      
+/* ------------------------------------------- */
+
+/* Para el video de YouTube dentro de Able Player */
+.able-wrapper {
+  position: relative;
+  /* Este padding asegura la relación de aspecto 16:9 */
+  padding-bottom: 56.25% !important; 
+  height: 0 !important;
+  overflow: hidden;
+}
+
+/* El iframe de YouTube se posiciona absolutamente para llenar el contenedor */
+.able-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Esto asegura que la transcripción no tenga una altura fija si no es necesario */
+.able-transcript {
+  height: auto !important;
+}
+
+/* Para el contenedor de la transcripción, si es un elemento hermano del video, 
+   Flexbox o Grid lo ajustará */
+#col2 {
+  height: 100%;
+}
       
     </style>
   
@@ -67,7 +97,7 @@
       <div id="columns">
         <div class="column" id="col1">
           <section id="player" aria-label="Video player">
-            <video id="video1" preload="auto" data-able-player="" data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-transcript-div="transcript" data-include-transcript="false">
+            <video id="video1" preload="auto" data-able-player data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-transcript-div="transcript" data-include-transcript="false">
               <track kind="captions" src="captions.vtt" srclang="es" label="Español"/>
             </video>
           </section>
