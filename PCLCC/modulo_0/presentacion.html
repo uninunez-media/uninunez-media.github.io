@@ -65,13 +65,16 @@
   position: relative;
   /* Este padding asegura la relación de aspecto 16:9 */
   padding-bottom: 56.25% !important; 
+ height: 0 !important;
+  overflow: hidden;
   
 }
 
 /* El iframe de YouTube se posiciona absolutamente para llenar el contenedor */
 .able-wrapper iframe {
-  top: 0;
-  left: 0;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
 }
