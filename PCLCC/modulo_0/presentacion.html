@@ -1,7 +1,51 @@
----
-layout: pclcc
-title: "Presentación PCLCC"
----
+<!DOCTYPE html>
+<html lang="es">
+<html>
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.min.css" />
+    <script src="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.dist.js"></script>
+    <link rel="stylesheet" href="../estilos.css" />
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background: #fff;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+      
+      div#wrapper {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 1280px;
+        max-width: 98%;
+        background: #fff;
+        margin-top: 2rem;
+        justify-content: flex-start; /* por defecto a la izquierda */
+        	gap: 20px;
+      }
+      
+      #player {
+        /* position: relative;*/
+        width: 70%;
+        transition: width 0.2s;
+      }
+      
+      #transcript {
+      		width: 30%;
+      	}
+    </style>
+  
+  </head>
 <body>
   <div id="wrapper">
     <div id="player">
@@ -14,3 +58,4 @@ title: "Presentación PCLCC"
   </div>
 
 </body>
+</html>
