@@ -6,7 +6,7 @@
     <script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.min.css" />
     <script src="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.dist.js"></script>
-    <link rel="stylesheet" href="../estilos.css" />
+    
     <style>
       html, body {
         height: 100%;
@@ -34,28 +34,61 @@
         	gap: 20px;
       }
       
-      #player {
-        /* position: relative;*/
+     /* #player {
+        
         width: 70%;
         transition: width 0.2s;
       }
       
       #transcript {
       		width: 30%;
-      	}
+      	}*/
+      div#columns {
+    		display: grid;
+    		grid-template-columns: 24% 1fr;
+    		gap: 20px;
+    		max-width: 1120px;
+    	}
+    	div#col1 {
+    		background-color: #e8ddf0;
+    		border: 1px solid #340449;
+    		margin-right: 1em;
+    	}
+    	div#col2 div.able-wrapper {
+    		margin-top: 0;
+    	}
+      section#player{
+    		width: 60%;
+    		max-width: 70%;
+    	}
+      section#transcript-wrapper {
+    		width: 25%;
+    		max-width: 30%;
+    	}
+
+
+      
+      
     </style>
   
   </head>
-<body>
-  <div id="wrapper">
-    <div id="player">
-      <video id="video1" preload="auto" data-able-player="" data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-transcript-div="transcript" data-include-transcript="false">
-          <track kind="captions" src="captions.vtt" srclang="es" label="Español"/>
-      </video>
-      <!--  -->
-    </div>
-    <div id="transcript"></div>
-  </div>
-
-</body>
+  <body>
+    <main>
+      <div id="columns">
+        <div class="column" id="col1">
+          <section id="player" aria-label="Video player">
+            <video id="video1" preload="auto" data-able-player="" data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-transcript-div="transcript" data-include-transcript="false">
+              <track kind="captions" src="captions.vtt" srclang="es" label="Español"/>
+            </video>
+          </section>
+        </div>
+        <div class="column" id="col2">
+          <section id="transcript-wrapper" aria-label="Transcript">
+            <div id="transcript"></div>
+          </section>
+        </div>
+       
+      </div>
+    </main>
+  </body>
 </html>
