@@ -12,23 +12,23 @@ body {
   align-items: flex-start;
 }
 
-
 div#wrapper {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  width: 1230px;
-  max-width: 100%;
+  width: 1280px;
+  max-width: 98%;
   background: #fff;
   margin-top: 2rem;
   justify-content: flex-start; /* por defecto a la izquierda */
+  	gap: 20px;
 }
 #wrapper.center-player {
   justify-content: center !important;
 }
 #player {
-  position: relative;
-  width: 100%;
+  /* position: relative;*/
+  width: 480px;
   transition: width 0.2s;
 }
 
@@ -73,8 +73,8 @@ div#wrapper {
   }
 }
 #transcript {
-  width: 100%;
-  }
+		width: 500px;
+	}
 #signs {
   width: 100%;
   }
