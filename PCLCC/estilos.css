@@ -51,6 +51,10 @@ div#wrapper {
   transition: top 0.2s;
 }
 
+#player .able-transcript {
+    height: 726px !important;
+}
+
 #player .able-wrapper .able  :has(.able-sign-window) {
   width: 50%;
   height: 100%;
