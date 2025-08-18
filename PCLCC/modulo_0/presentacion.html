@@ -60,16 +60,15 @@
       
 /* ------------------------------------------- */
 
-#player .able-wrapper,
-#player .able-wrapper .video-wrapper,
-#player .able-wrapper iframe {
-  position: relative !important;
-  padding-bottom: 56.25% !important;
+#player .able-media-container {
+  position: relative;
+  /* padding-bottom para mantener el aspect-ratio 16:9 */
+  padding-bottom: 56.25% !important; 
   height: 0 !important;
-  overflow: hidden !important;
+  overflow: hidden;
 }
 
-#player .able-wrapper iframe {
+#player .able-media-container iframe {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
