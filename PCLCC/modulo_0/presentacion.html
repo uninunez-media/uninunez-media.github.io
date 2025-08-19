@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.min.css" />
     <script src="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.dist.js"></script>
     
-    <style>
+   <style>
       html, body {
         height: 100%;
         margin: 0;
@@ -32,67 +32,66 @@
         background: #fff;
         margin-top: 2rem;
         justify-content: flex-start; /* por defecto a la izquierda */
-        	gap: 20px;
+        gap: 20px;
       }
       
-     /* #player {
-        
-        width: 70%;
-        transition: width 0.2s;
-      }
-      
-      #transcript {
-      		width: 30%;
-      	}*/
       div#columns {
-    		display: grid;
-    		grid-template-columns: 70% 1fr;
-    		gap: 10px;
-    		max-width: 1120px;
-    	}
-    	div#col2 {
-    		/*background-color: #e8ddf0;
-    		border: 1px solid #340449;*/
-    		margin-right: 1em;
-    	}
-    	div#col1 div.able-wrapper {
-    		margin-top: 0;
-    	}
-      
-      /* ------------------------------------------- */
-#player video[data-able-player] {   /* <-- agregado */
-    display: block;
-    width: 100%;
-    aspect-ratio: 16/9;   /* mantiene relación 16:9 */
-   height: auto; 
-    background: #fff;       /* placeholder negro */
-  }
-      
-      #player .able-media-container {
-        position: relative;
-        /* padding-bottom para mantener el aspect-ratio 16:9 */
-        padding-bottom: 56.25% !important; 
-        height: 0 !important;
-        overflow: hidden;
+        display: grid;
+        grid-template-columns: 70% 1fr;
+        gap: 10px;
+        max-width: 1120px;
       }
-      
-      #player .able-media-container iframe {
+      div#col2 {
+        margin-right: 1em;
+      }
+      div#col1 div.able-wrapper {
+        margin-top: 0;
+      }
+    
+      /* ------------------------------------------- */
+      /* Reserva espacio desde el inicio */
+      #player {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+      }
+    
+      /* Oculta el wrapper inicial hasta que exista el iframe */
+      #player .able-wrapper {
+        position: absolute;
+        inset: 0;
+        visibility: hidden;
+      }
+      #player .able-wrapper:has(.able-media-container iframe) {
+        visibility: visible;
+      }
+    
+      /* Asegura proporción del iframe */
+      #player .able-media-container {
         position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
+        inset: 0 !important;
         width: 100% !important;
         height: 100% !important;
       }
-     #transcript .able-transcript-caption {    
-        /*display: block;*/                         
+      #player .able-media-container iframe {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    
+      /* Transcript: respeta saltos de línea del .vtt */
+      #transcript .able-transcript-caption {
         margin-bottom: 0.3em;
-        white-space: pre-line;                   
+        white-space: pre-line;
       }
-
+    
       #col2 {
-         align-self: stretch;
+        align-self: stretch;
       }
-            @media (max-width: 900px) {
+    
+      @media (max-width: 900px) {
         div#columns {
           grid-template-columns: 1fr;
           grid-template-rows: auto auto;
@@ -100,6 +99,7 @@
         }
       }
     </style>
+
   
   </head>
   <body>
