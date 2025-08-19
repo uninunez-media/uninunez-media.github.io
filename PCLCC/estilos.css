@@ -77,8 +77,8 @@
   opacity: 0;
   transition: opacity 0.4s ease;
 }
-     #transcript .able-language,
-#transcript .able-transcript-language,
-#transcript select[aria-label*="Transcript"] {
+.able-transcript-area .transcript-language-select-wrapper,
+.able-transcript-area label[for^="transcript-language-select-"],
+.able-transcript-area select[id^="transcript-language-select-"] {
   display: none !important;
 }
