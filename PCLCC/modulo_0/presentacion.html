@@ -115,10 +115,43 @@
       </div>
     </main>
     <script>
-  // Cuando AblePlayer termine de inicializar
-  $(document).on('initialized.ableplayer', function () {
-    $('#player .able-wrapper').css('opacity', 1);
-  });
+  (function () {
+    // Función para mostrar el player
+    function showPlayer() {
+      $('#player .able-wrapper').css('opacity', 1);
+    }
+
+    // 1) Evento oficial de AblePlayer
+    $(document).on('initialized.ableplayer', function () {
+      showPlayer();
+    });
+
+    // 2) Si el wrapper/iframe ya existen cuando cargamos este script
+    function checkNow() {
+      var $w = $('#player .able-wrapper');
+      if ($w.length && $w.find('iframe').length) {
+        showPlayer();
+        return true;
+      }
+      return false;
+    }
+    if (checkNow()) return;
+
+    // 3) Observa el DOM hasta que aparezca el iframe
+    var target = document.getElementById('player');
+    if (target) {
+      var obs = new MutationObserver(function () {
+        if (checkNow()) {
+          obs.disconnect();
+        }
+      });
+      obs.observe(target, { childList: true, subtree: true });
+    }
+
+    // 4) Respaldo duro (por si todo falla)
+    setTimeout(showPlayer, 4000);
+  })();
 </script>
+
   </body>
 </html>
