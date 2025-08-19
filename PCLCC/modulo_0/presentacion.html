@@ -84,6 +84,10 @@
       gap: 20px;
     }
   }
+     #player .able-wrapper {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
 </style>
 
 
@@ -110,5 +114,11 @@
        
       </div>
     </main>
+    <script>
+  // Cuando AblePlayer termine de inicializar
+  $(document).on('initialized.ableplayer', function () {
+    $('#player .able-wrapper').css('opacity', 1);
+  });
+</script>
   </body>
 </html>
