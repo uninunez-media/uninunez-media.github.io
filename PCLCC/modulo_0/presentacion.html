@@ -77,9 +77,15 @@
 }
 
 #col2 {
-  height: 100%;
+   align-self: stretch;
 }
-      
+      @media (max-width: 900px) {
+  div#columns {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+}
     </style>
   
   </head>
