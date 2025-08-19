@@ -1,35 +1,84 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  background: #fff;
-}
-body {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
+ html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: #fff;
+  }
+  body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
 
-div#wrapper {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  width: 1280px;
-  max-width: 98%;
-  background: #fff;
-  margin-top: 2rem;
-  justify-content: flex-start; /* por defecto a la izquierda */
-  	gap: 20px;
-}
+  div#wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 1280px;
+    max-width: 98%;
+    background: #fff;
+    margin-top: 2rem;
+    justify-content: flex-start;
+    gap: 20px;
+  }
 
-#player {
-  /* position: relative;*/
-  width: 70%;
-  transition: width 0.2s;
-}
+  div#columns {
+    display: grid;
+    grid-template-columns: 70% 1fr;
+    gap: 10px;
+    max-width: 1120px;
+  }
+  div#col2 { margin-right: 1em; }
+  div#col1 div.able-wrapper { margin-top: 0; }
 
-#transcript {
-		width: 30%;
-	}
+  /* ------------------ Reserva espacio desde el primer render ------------------ */
+  /* 1) El <video> ocupa 16:9 para evitar el “cuadrito” inicial */
+  #player video[data-able-player]{
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;   /* relación 16:9 */
+    background: #000;       /* placeholder negro */
+    height: auto;
+  }
+
+  /* 2) Cuando AblePlayer monta, usa el contenedor clásico 16:9 */
+  #player .able-media-container{
+    position: relative;
+    padding-bottom: 56.25% !important; /* 16:9 */
+    height: 0 !important;
+    overflow: hidden;
+  }
+  #player .able-media-container iframe{
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* ------------------ Transcript: respetar saltos ------------------ */
+  #transcript .able-transcript-caption{
+    margin-bottom: .3em;
+    white-space: pre-line;
+  }
+
+  #col2 { align-self: stretch; }
+
+  @media (max-width: 900px){
+    div#columns{
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+  }
+     #player .able-wrapper {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+     #transcript .able-language,
+#transcript .able-transcript-language,
+#transcript select[aria-label*="Transcript"] {
+  display: none !important;
+}
