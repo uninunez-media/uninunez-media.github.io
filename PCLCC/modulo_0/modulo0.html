@@ -15,29 +15,24 @@
 <!-- Able Player JavaScript -->
 <script src="https://ableplayer.github.io/ableplayer/build/ableplayer.dist.js"></script>
 
-<!-- CSS for this example -->
-<style>
-	#video-wrapper {
-		width: 500px;
-	}
-</style>
+
 </head>
 
 <body>
 	<main>
-		<h1>Video with sign language sourced from YouTube</h1>
-
-		<p>An accompanying sign language video is provided using the
-			<code>data-youtube-sign-src</code> attribute. This results in a sign language video being played in a pop-up window
-			in sync with the program video. Unfortunately, this does not work in iOS.
-		</p>
+		
 
 		<div id="video-wrapper">
-			<video id="video1" preload="auto" poster="" data-icon-type="image" data-able-player playsinline>
-				<source type="video/mp4" src="https://uninunez-media.github.io/Recursos/Recursos.mp4" data-youtube-sign-src="bf6214F7srY"/>
-				<track kind="captions" src="https://uninunez-media.github.io/Recursos/Recursos_Captions.vtt" srclang="de" label="Deutsche"/>
-				
-			</video>
+		
+
+<video id="video1" preload="auto" data-able-player data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-youtube-sign-src="bf6214F7srY" data-transcript-div="transcript" data-show-transcript="true" playsinline>
+  <track kind="subtitles" src="captions_presentacion.vtt" srclang="es" label="Español"/>
+  <track kind="subtitles" src="captions_presentacion_en.vtt" srclang="en" label="English"/>
+  <track kind="chapters" src="chapters_presentacion.vtt" srclang="es"/>
+  <track kind="chapters" src="chapters_presentacion_en.vtt" srclang="en"/>
+</video>
+
+			
 		</div>
 
 	</main>
