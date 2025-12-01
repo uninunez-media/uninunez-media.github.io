@@ -1,6 +1,52 @@
----
-layout: default
-title: "Presentación diplomado PCLCC"
----
-	<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-id="Lf6JLhQXaWg" data-youtube-sign-src="bf6214F7srY" playsinline>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Video with synchronized sign language sourced from YouTube | Able Player Demos</title>
+<link rel="stylesheet" href="demos.css" type="text/css">
+
+<!-- Dependencies -->
+<script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+
+<!-- Able Player CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.min.css" type="text/css"/>
+
+<!-- Able Player JavaScript -->
+<script src="https://cdn.jsdelivr.net/gh/uninunez-media/ableplayer@main/build/ableplayer.min.js"></script>
+
+<!-- CSS for this example -->
+<style>
+	#video-wrapper {
+		width: 500px;
+	}
+</style>
+</head>
+
+<body>
+	<header>
+		<div class="title">Able Player Demos</div>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="index.html">More demos</a></li>
+			<li><a href="https://ableplayer.github.io/ableplayer">Able Player Home</a></li>
+		</ul>
+	</nav>
+	<main>
+		<h1>Video with sign language sourced from YouTube</h1>
+
+		<p>An accompanying sign language video is provided using the
+			<code>data-youtube-sign-src</code> attribute. This results in a sign language video being played in a pop-up window
+			in sync with the program video. Unfortunately, this does not work in iOS.
+		</p>
+
+			<div class="wrapper">
+			<video id="video1" data-able-player preload="auto" data-youtube-nocookie="true" data-youtube-id="Lf6JLhQXaWg" data-youtube-sign-src="bf6214F7srY" playsinline>
 			</video>
+		</div>
+
+	</main>
+</body>
+</html>
