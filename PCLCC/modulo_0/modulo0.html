@@ -1,40 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Video with synchronized sign language sourced from YouTube | Able Player Demos</title>
-
-<!-- Dependencies -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
-
-<!-- Able Player CSS -->
-<link rel="stylesheet" href="https://ableplayer.github.io/ableplayer/build/ableplayer.min.css" type="text/css"/>
-
-<!-- Able Player JavaScript -->
-<script src="https://ableplayer.github.io/ableplayer/build/ableplayer.dist.js"></script>
-
-
-</head>
-
-<body>
-	<main>
-		
-
-		<div id="video-wrapper">
-		
-
-<video id="video1" preload="auto" data-able-player data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro" data-youtube-sign-src="bf6214F7srY" data-transcript-div="transcript" data-show-transcript="true" playsinline>
+---
+layout: pclcc
+title: "AblePlayer with external Transcript"
+---
+<video id="video1" preload="auto" data-able-player data-youtube-nocookie="true" data-youtube-id="RTUGD4_Zlro"  data-youtube-sign-src="bf6214F7srY" data-transcript-div="transcript" data-show-transcript="true" playsinline>
   <track kind="subtitles" src="captions_presentacion.vtt" srclang="es" label="Español"/>
   <track kind="subtitles" src="captions_presentacion_en.vtt" srclang="en" label="English"/>
   <track kind="chapters" src="chapters_presentacion.vtt" srclang="es"/>
   <track kind="chapters" src="chapters_presentacion_en.vtt" srclang="en"/>
 </video>
-
-			
-		</div>
-
-	</main>
-</body>
-</html>
