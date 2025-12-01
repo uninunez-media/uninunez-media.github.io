@@ -1,1 +1,26 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% include head2.html %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/uninunez-media.github.io@refs/heads/main/PCLCC/estilos.css" />
+</head>
+<body>
+    <main>
+      <div id="columnspclcc">
+        <div class="column" id="col1">
+          <section id="player" aria-label="Video player">
+  {{ content }}
+               </section>
+        </div>
+        <div class="column" id="col2">
+          <section id="transcript-wrapper" aria-label="Transcript">
+            <div id="transcript"></div>
+          </section>
+        </div>
+       
+      </div>
+    </main>
+  <script src="../app.js"></script>
+</body>
+</html>
