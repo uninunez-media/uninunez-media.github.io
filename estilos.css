@@ -44,7 +44,7 @@ div#wrapper {
 #player .able-transcript-area {
   position: absolute !important;
   left: calc(100% + 10px) !important;
-  top: 34% !important;
+  top: 40% !important;
   width: 30% !important;
   z-index: 10000 !important;
   margin: 0 !important;
