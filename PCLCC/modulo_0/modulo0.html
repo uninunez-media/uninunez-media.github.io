@@ -8,8 +8,89 @@
 
 <link rel="stylesheet" href="https://ableplayer.github.io/ableplayer/build/ableplayer.min.css" />
 <script src="https://ableplayer.github.io/ableplayer/build/ableplayer.dist.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/uninunez-media/uninunez-media.github.io@refs/heads/main/estilos.css" />
+<style >
 
+ html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: #fff;
+}
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+
+div#wrapper {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 1230px;
+  max-width: 100%;
+  background: #fff;
+  margin-top: 2rem;
+  justify-content: flex-start; /* por defecto a la izquierda */
+}
+#wrapper.center-player {
+  justify-content: center !important;
+}
+#player {
+  position: relative;
+  width: 100%;
+  transition: width 0.2s;
+}
+
+#player .able-sign-window {
+  position: absolute !important;
+  left: calc(100% + 10px) !important;
+  top: 0px !important;
+  width: 30% !important;
+  z-index: 10000 !important;
+  margin: 0 !important;
+}
+
+#player .able-transcript-area {
+  position: absolute !important;
+  left: calc(100% + 10px) !important;
+  top: 45% !important;
+  width: 30% !important;
+  z-index: 10000 !important;
+  margin: 0 !important;
+  transition: top 0.2s;
+}
+
+#player .able-wrapper .able  :has(.able-sign-window) {
+  width: 50%;
+  height: 100%;
+}
+@media (max-width: 900px) {
+  #player {
+    width: 100% !important;
+  }
+  #player .able-sign-window,
+  #player .able-transcript-area {
+    position: static !important;
+    left: unset !important;
+    top: unset !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+}
+#transcript {
+  width: 100%;
+  }
+#signs {
+  width: 100%;
+  }
+#transcript div.able-desc,
+#signs div.able-desc {
+  width: 100%;
+}
+</style>
 </head>
 <body>
   <div id="wrapper">
