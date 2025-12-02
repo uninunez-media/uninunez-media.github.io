@@ -63,7 +63,6 @@
             object-fit: cover !important; z-index: 1 !important;
         }
 
-        /* --- 4. SEÑAS (TOP RIGHT) --- */
         div.able-sign-window {
             position: fixed !important;
             top: 0 !important;
@@ -133,7 +132,7 @@
         }
         .able-button-handler-sign { display: inline-block !important; width: auto !important; height: auto !important; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 700px) {
             html, body { overflow-y: auto !important; height: auto !important; }
             #wrapper { height: auto !important; position: static !important; display: block !important; }
             #resizer-x, #iframe-overlay { display: none !important; }
@@ -205,7 +204,7 @@
         });
 
         function checkLayout() {
-            if (window.innerWidth <= 900) return;
+            if (window.innerWidth <= 700) return;
 
             var signWindow = document.querySelector('.able-sign-window');
             var transcriptWindow = document.querySelector('.able-transcript-area');
