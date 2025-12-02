@@ -42,7 +42,7 @@
 
         #player {
             position: absolute !important; left: 0 !important; top: 0 !important;
-            width: var(--split-x) !important; height: 100vh !important;
+            width: var(--safe-split-x) !important; height: 100vh !important;
             z-index: 10 !important; box-sizing: border-box; background: #000;
             transition: width 0.1s linear;
         }
@@ -67,7 +67,7 @@
         div.able-sign-window {
             position: fixed !important;
             top: 0 !important;
-            left: calc(var(--split-x) + var(--resizer-w)) !important;
+            left: calc(var(--safe-split-x) + var(--resizer-w)) !important;
             right: 0 !important;
             width: auto !important;
             height: var(--split-y) !important; /* Altura controlada por variable */
@@ -82,7 +82,7 @@
             position: fixed !important;
             top: var(--split-y) !important;
             bottom: 0 !important;
-            left: calc(var(--split-x) + var(--resizer-w)) !important;
+            left: calc(var(--safe-split-x) + var(--resizer-w)) !important;
             right: 0 !important;
             width: auto !important;
             height: auto !important;
