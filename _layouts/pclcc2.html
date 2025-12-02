@@ -16,6 +16,7 @@
             --split-x: 80%;      /* Ancho del video (Dinámico) */
             --split-y: 40%;      /* Altura de Señas (40%, 0% o 100%) */
             --resizer-w: 10px;
+            --safe-split-x: min(var(--split-x), calc(100vw - 300px - var(--resizer-w)));
         }
 
         html, body {
@@ -25,7 +26,7 @@
         #wrapper { position: relative; width: 100%; height: 100vh; background-color: #000; }
 
         #resizer-x {
-            position: fixed; left: var(--split-x); top: 0; bottom: 0;
+            position: fixed; left: var(--safe-split-x); top: 0; bottom: 0;
             width: var(--resizer-w); background: #333; cursor: col-resize; z-index: 20000;
             display: flex; align-items: center; justify-content: center;
             border-left: 1px solid #555; border-right: 1px solid #000;
@@ -165,7 +166,7 @@
                 width: 100vw !important; height: 400px !important;
                 top: auto !important; bottom: auto !important; left: auto !important;
                 border-top: 2px solid #333 !important; z-index: 1 !important;
-                display: block !important;
+               
             }
             div.able-transcript { position: relative !important; height: 100% !important; }
             div.able-transcript-container { position: relative !important; height: 100% !important; overflow-y: visible !important; }
@@ -194,7 +195,7 @@
         document.addEventListener('mousemove', (e) => {
             if (!isResizingX) return;
             let percX = (e.clientX / window.innerWidth) * 100;
-            if (percX < 20) percX = 20; if (percX > 80) percX = 80;
+            if (percX < 20) percX = 20; if (percX > 90) percX = 90;
             document.documentElement.style.setProperty('--split-x', percX + '%');
         });
 
