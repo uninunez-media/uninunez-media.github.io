@@ -13,8 +13,8 @@
 
     <style>
         :root {
-            --split-x: 80%;      /* Ancho del video (Dinámico) */
-            --split-y: 40%;      /* Altura de Señas (40%, 0% o 100%) */
+            --split-x: 80%;
+            --split-y: 40%;
             --resizer-w: 10px;
             --safe-split-x: min(var(--split-x), calc(100vw - 250px - var(--resizer-w)));
         }
@@ -25,6 +25,16 @@
         }
         #wrapper { position: relative; width: 100%; height: 100vh; background-color: #000; }
 
+        /* --- Etiqueta de la Lengua de Señas (Label) --- */
+        #sign-label-overlay {
+            position: absolute; top: 5px; right: 5px; z-index: 20005; 
+            background: rgba(0, 0, 0, 0.6); padding: 4px 8px; border-radius: 4px;
+            border: 1px solid #444; color: #fff; font-size: 12px; font-weight: bold;
+            display: none; pointer-events: none;
+        }
+        #sign-label-overlay.visible { display: block; }
+
+        /* --- Resizer Vertical --- */
         #resizer-x {
             position: fixed; left: var(--safe-split-x); top: 0; bottom: 0;
             width: var(--resizer-w); background: #333; cursor: col-resize; z-index: 20000;
@@ -40,6 +50,7 @@
         }
         body.is-resizing-x #iframe-overlay { display: block; }
 
+        /* --- Player & Layout --- */
         #player {
             position: absolute !important; left: 0 !important; top: 0 !important;
             width: var(--safe-split-x) !important; height: 100vh !important;
@@ -64,20 +75,23 @@
             object-fit: cover !important; z-index: 1 !important;
         }
 
+        /* --- Ventana de Señas --- */
         div.able-sign-window {
             position: fixed !important;
             top: 0 !important;
             left: calc(var(--safe-split-x) + var(--resizer-w)) !important;
             right: 0 !important;
             width: auto !important;
-            height: var(--split-y) !important; /* Altura controlada por variable */
+            height: var(--split-y) !important; 
             z-index: 9999 !important;
             background: #222 !important;
             border-bottom: 4px solid #333;
             transition: height 0.3s ease;
+            contain: content; 
         }
         div.able-sign-window iframe { width: 100% !important; height: 100% !important; }
 
+        /* --- Transcripción --- */
         div.able-transcript-area {
             position: fixed !important;
             top: var(--split-y) !important;
@@ -89,30 +103,26 @@
             z-index: 9999 !important;
             background: #fff !important;
             transition: top 0.3s ease;
-            
             display: block; overflow: hidden !important; padding: 0 !important; border-left: none !important;
         }
         .able-window-toolbar { display: none !important; }
+        div.able-transcript { position: absolute !important; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden !important; }
+        div.able-transcript-container { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; height: 100% !important; overflow-y: auto !important; padding: 15px !important; }
 
-        div.able-transcript {
-            position: absolute !important; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden !important;
-        }
-        div.able-transcript-container {
-            position: absolute !important; top: 0; left: 0; right: 0; bottom: 0;
-            height: 100% !important; overflow-y: auto !important; padding: 15px !important;
-        }
-
+        /* --- Controles --- */
         #player .able-player {
             position: absolute !important; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 100 !important; pointer-events: none !important;
             display: flex !important; flex-direction: column !important; justify-content: flex-end !important;
         }
-        #player .able-controller {
-            order: 1 !important; position: relative !important; width: 100% !important;
-            background-color: rgba(0, 0, 0, 0.9) !important;
-            display: flex !important; flex-direction: column !important;
-            padding-top: 5px !important; pointer-events: auto !important;
+        #player .able-controller, #player .able-window-toolbar, #player .able-big-play-button {
+            pointer-events: auto !important; z-index: 21000 !important; position: relative !important;
         }
+        #player .able-controller {
+            order: 1 !important; width: 100% !important; background-color: rgba(0, 0, 0, 0.9) !important;
+            display: flex !important; flex-direction: column !important; padding-top: 5px !important;
+        }
+        #player button, #player input, #player .able-seekbar { pointer-events: auto !important; cursor: pointer !important; }
         #player .able-status-bar {
             order: 2 !important; position: relative !important; width: 100% !important;
             background-color: rgba(0, 0, 0, 0.9) !important; color: #ddd !important;
@@ -121,8 +131,7 @@
         }
         #player .able-seekbar-wrapper { width: 98% !important; margin: 0 auto !important; }
         #player .able-control-row { display: flex !important; flex-wrap: wrap !important; width: 100% !important; }
-        .able-tooltip { z-index: 20000 !important; bottom: 100% !important; top: auto !important; }
-        
+        .able-tooltip { z-index: 22000 !important; bottom: 100% !important; top: auto !important; }
         #player .able-captions-wrapper {
             position: absolute !important; bottom: 100px !important; left: 0 !important; width: 100% !important;
             z-index: 90 !important; pointer-events: none !important; background: transparent !important; text-align: center !important;
@@ -131,45 +140,28 @@
             background-color: rgba(0, 0, 0, 0.6) !important; display: inline-block !important;
             padding: 5px 10px !important; border-radius: 4px; pointer-events: auto !important;
         }
-        .able-button-handler-sign { display: inline-block !important; width: auto !important; height: auto !important; }
 
         @media (max-width: 700px) {
             html, body { overflow-y: auto !important; height: auto !important; }
             #wrapper { height: auto !important; position: static !important; display: block !important; }
             #resizer-x, #iframe-overlay { display: none !important; }
-
-            #player, #player.expanded { 
-                position: relative !important; width: 100vw !important; height: auto !important; 
-                border: none !important; padding-bottom: 0 !important; 
-            }
-            #player .able-wrapper, #player .able {
-                display: flex !important; flex-direction: column !important;
-                height: auto !important; width: 100% !important; position: relative !important;
-            }
-            #player .able-player { position: relative !important; height: auto !important; justify-content: flex-start !important; pointer-events: auto !important; order: 2 !important; }
-            #player .able-vidcap-container { order: 1 !important; position: relative !important; height: auto !important; width: 100% !important; }
-            #player .able-media-container { aspect-ratio: 16/9 !important; height: auto !important; padding-bottom: 0 !important; position: relative !important; }
+            #sign-label-overlay { display: none !important; }
+            #player, #player.expanded { position: relative !important; width: 100vw !important; height: auto !important; }
+            #player .able-wrapper, #player .able { display: flex !important; flex-direction: column !important; height: auto !important; position: relative !important; }
+            #player .able-player { position: relative !important; height: auto !important; pointer-events: auto !important; order: 2 !important; }
+            #player .able-vidcap-container { order: 1 !important; position: relative !important; height: auto !important; }
+            #player .able-media-container { aspect-ratio: 16/9 !important; height: auto !important; position: relative !important; }
             #player iframe, #player video { position: relative !important; object-fit: contain !important; height: 100% !important; }
-            #player .able-captions-wrapper { position: absolute !important; bottom: 10px !important; }
-
             div.able-sign-window {
-                order: 3 !important; position: relative !important;
-                width: 100vw !important; aspect-ratio: 16 / 9 !important;
-                height: auto !important; max-height: 60vw !important;
-                top: auto !important; right: auto !important; left: auto !important;
+                order: 3 !important; position: relative !important; width: 100vw !important; aspect-ratio: 16 / 9 !important;
+                height: auto !important; max-height: 60vw !important; top: auto !important; right: auto !important; left: auto !important;
                 z-index: 1 !important; background: #000 !important;
             }
             div.able-sign-window iframe { position: absolute !important; height: 100% !important; }
-
             div.able-transcript-area {
-                order: 4 !important; position: relative !important;
-                width: 100vw !important; height: 400px !important;
-                top: auto !important; bottom: auto !important; left: auto !important;
-                border-top: 2px solid #333 !important; z-index: 1 !important;
-               
+                order: 4 !important; position: relative !important; width: 100vw !important; height: 400px !important;
+                top: auto !important; border-top: 2px solid #333 !important; z-index: 1 !important;
             }
-            div.able-transcript { position: relative !important; height: 100% !important; }
-            div.able-transcript-container { position: relative !important; height: 100% !important; overflow-y: visible !important; }
         }
     </style>
 </head>
@@ -178,31 +170,100 @@
     <div id="iframe-overlay"></div>
     <div id="resizer-x" title="Arrastra para ajustar ancho"></div>
 
+    <div id="sign-label-overlay">LS</div>
+
     <div id="wrapper">
-        <div id="player">
-            {{ content }}
-        </div>
+    <div id="player">
+        {{ content }}
     </div>
+</div>
 
     <script>
-        // 1. Resizer Vertical (X)
+        // CONFIGURACIÓN Y VARIABLES SEÑAS
+        const params = new URLSearchParams(window.location.search);
+        
+        //const mainVideoId = params.get('v') || ''; // Video principal por defecto
+        
+        const rawSignId = params.get('sign');       
+        const signLabel = params.get('label');
+        
+        const labelOverlay = document.getElementById('sign-label-overlay');
+        const videoElement = document.getElementById('video1');
+
+        // FUNCIÓN DE INICIO 
+        function startPlayer() {
+            // Inicializar AblePlayer manualmente sobre el video existente
+            // Usamos jQuery $() porque AblePlayer lo requiere
+            $(document).ready(function() {
+                new AblePlayer($(videoElement)[0]);
+            });
+        }
+
+        // LOGICA DE VALIDACIÓN E INYECCIÓN DE ATRIBUTOS
+        function init() {
+            // 1 Seteamos el Video Principal (atributo data-youtube-id)
+           // videoElement.setAttribute('data-youtube-id', mainVideoId);
+
+            // 2 Si no hay parámetro de señas, iniciamos directo
+            if (!rawSignId || rawSignId.trim() === "") {
+                startPlayer();
+                return;
+            }
+
+            const cleanSignId = rawSignId.trim();
+
+            // 3 Validación Regex
+            const youtubeRegex = /^[a-zA-Z0-9_-]{11}$/;
+            if (!youtubeRegex.test(cleanSignId)) {
+                console.warn("ID de señas inválido. Iniciando sin señas.");
+                startPlayer();
+                return;
+            }
+
+            // 4 Validación de Existencia (Miniatura)
+            const img = new Image();
+            img.src = `https://img.youtube.com/vi/${cleanSignId}/mqdefault.jpg`;
+            
+            img.onload = function() {
+                if (this.width === 120) {
+                    // Video no existe (imagen default de YT)
+                    console.warn("Video de señas no disponible. Iniciando sin señas.");
+                    startPlayer();
+                } else {
+                    // Video EXISTE: Agregamos el atributo al HTML existente
+                    videoElement.setAttribute('data-youtube-sign-src', cleanSignId);
+                    
+                    // Actualizamos el label si existe
+                    if (signLabel) labelOverlay.textContent = signLabel;
+                    
+                    // Iniciamos el reproductor
+                    startPlayer();
+                }
+            };
+
+            img.onerror = function() {
+                console.warn("Error validando señas. Iniciando sin señas.");
+                startPlayer();
+            };
+        }
+
+        // Ejecutar
+        init();
+
+
+        // LAYOUT & RESIZER
         const resizerX = document.getElementById('resizer-x');
         const body = document.body;
         let isResizingX = false;
 
         resizerX.addEventListener('mousedown', () => { isResizingX = true; body.classList.add('is-resizing-x'); });
-
         document.addEventListener('mousemove', (e) => {
             if (!isResizingX) return;
             let percX = (e.clientX / window.innerWidth) * 100;
             if (percX < 20) percX = 20; if (percX > 90) percX = 90;
             document.documentElement.style.setProperty('--split-x', percX + '%');
         });
-
-        document.addEventListener('mouseup', () => {
-            isResizingX = false;
-            body.classList.remove('is-resizing-x');
-        });
+        document.addEventListener('mouseup', () => { isResizingX = false; body.classList.remove('is-resizing-x'); });
 
         function checkLayout() {
             if (window.innerWidth <= 700) return;
@@ -211,7 +272,17 @@
             var transcriptWindow = document.querySelector('.able-transcript-area');
             var player = document.getElementById('player');
             var rX = document.getElementById('resizer-x');
+            var overlay = document.getElementById('sign-label-overlay');
 
+            // Mover label si corresponde
+            if (signWindow && overlay.parentElement !== signWindow) {
+                signWindow.appendChild(overlay);
+                overlay.classList.add('visible');
+            } else if (!signWindow) {
+                overlay.classList.remove('visible');
+            }
+
+            // Lógica Layout
             var signHidden = !signWindow || window.getComputedStyle(signWindow).display === 'none';
             var transHidden = !transcriptWindow || window.getComputedStyle(transcriptWindow).display === 'none';
 
@@ -222,16 +293,9 @@
             else {
                 player.classList.remove('expanded');
                 rX.style.display = 'flex';
-
-                if (!signHidden && transHidden) {
-                    document.documentElement.style.setProperty('--split-y', '40%');
-                }
-                else if (signHidden && !transHidden) {
-                    document.documentElement.style.setProperty('--split-y', '0%');
-                }
-                else {
-                    document.documentElement.style.setProperty('--split-y', '40%');
-                }
+                if (!signHidden && transHidden) document.documentElement.style.setProperty('--split-y', '40%');
+                else if (signHidden && !transHidden) document.documentElement.style.setProperty('--split-y', '0%');
+                else document.documentElement.style.setProperty('--split-y', '40%');
             }
         }
         setInterval(checkLayout, 500);
