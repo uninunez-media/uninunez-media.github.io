@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Educativo Estilo Tarjeta</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap');
+
+        /* --- CONFIGURACIÓN DE COLORES --- */
+        :root {
+            /* Valor por defecto, se sobrescribe con JS si hay parámetro en URL */
+            --color-primario: #249A8C; 
+            
+            --color-blanco: #ffffff;
+            --color-gris-fondo: #f9f9f9;
+        }
+
+        body {
+            margin: 0;
+            padding: 40px;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .banner {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--color-blanco);
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            min-height: 350px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border-radius: 12px;
+            isolation: isolate; 
+        }
+
+        /* --- IZQUIERDA: TEXTOS Y LOGOS --- */
+        .contenido-izq {
+            flex: 1;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        /* Título Superior */
+        .titulo-top {
+            color: var(--color-primario);
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            padding: 0 0 10px 50px;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        /* Franja de Color */
+        .franja-color {
+            background-color: var(--color-primario);
+            color: var(--color-blanco);
+            padding: 50px 50px;
+            width: 120%; 
+            position: relative;
+            z-index: 1; 
+            margin-bottom: 20px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.15);
+            display: flex; 
+            align-items: center;
+        }
+
+        .franja-color h2 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 400;
+            line-height: 1.25; 
+            max-width: 50%; 
+            overflow-wrap: break-word; 
+        }
+
+        /* Logos */
+        .logos-area {
+            padding: 0 0 0 50px;
+            margin-top: 10px;
+        }
+        
+        .logos-img {
+            height: 50px;
+            width: auto;
+            display: block;
+        }
+
+        /* --- DERECHA: BLOQUE IMAGEN Y DECORACIÓN --- */
+        .bloque-imagen {
+            width: 45%; 
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 20; 
+            pointer-events: none; 
+        }
+
+        .imagen-container {
+            /* TAMAÑO REDUCIDO (antes 420x380) */
+            width: 340px;
+            height: 300px;
+            position: relative;
+            pointer-events: auto;
+            right: 13px; 
+            
+            /* Forma principal */
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+            border: 12px solid white; 
+            
+            overflow: hidden;
+            box-shadow: -10px 10px 20px rgba(0,0,0,0.15);
+            background: white;
+            transition: all 0.5s ease;
+            z-index: 5; 
+        }
+
+        .imagen-banner {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.05); 
+        }
+
+        /* --- DECORACIONES: LINEAS AJUSTADAS --- */
+        
+        .linea-organica {
+            position: absolute;
+            border: 2px solid var(--color-primario);
+            background: transparent;
+            z-index: 10; 
+            pointer-events: none;
+        }
+
+        /* Línea 1 */
+        .linea-1 {
+            width: 345px; 
+            height: 305px;
+            right: 40px; 
+            
+            border-radius: 44% 56% 68% 32% / 47% 43% 53% 57%;
+            transform: rotate(-3deg); 
+            opacity: 0.8;
+        }
+
+        /* Línea 2 */
+        .linea-2 {
+            width: 350px;
+            height: 310px;
+            right: 48px; 
+            top: 20px; 
+            
+            border-radius: 40% 60% 72% 28% / 43% 47% 57% 53%;
+            transform: rotate(4deg);
+            border-width: 1px; 
+            opacity: 0.6;
+        }
+
+        /* --- RESPONSIVE / MÓVIL --- */
+        @media (max-width: 900px) {
+            .banner {
+                flex-direction: column;
+                height: auto;
+                text-align: center;
+                padding-bottom: 30px;
+                padding-top: 0;
+            }
+
+            .contenido-izq {
+                width: 100%;
+                padding: 0;
+                display: contents; 
+            }
+
+            .titulo-top {
+                order: 1;
+                padding: 30px 20px 10px 20px;
+                font-size: 1.5rem;
+                margin-top: 10px;
+            }
+
+            .bloque-imagen {
+                position: relative;
+                width: 100%;
+                height: auto;
+                right: auto;
+                top: auto;
+                order: 2;
+                display: flex;
+                justify-content: center;
+                margin: 10px 0;
+            }
+
+            /* Ajustes Móvil para Imagen */
+            .imagen-container {
+                width: 220px;
+                height: 220px;
+                right: auto; 
+                border-radius: 50% 50% 50% 50% / 60% 40% 60% 40%; 
+                border-width: 8px; 
+            }
+
+            /* Ajustes Móvil para Líneas */
+            .linea-1 {
+                width: 225px;
+                height: 225px;
+                right: auto; 
+                margin-right: 0;
+                margin-top: 0;
+                border-radius: 51% 49% 48% 52% / 58% 42% 58% 42%;
+                transform: rotate(-5deg);
+            }
+            .linea-2 {
+                width: 230px;
+                height: 230px;
+                right: auto;
+                top: auto;
+                margin-left: 0;
+                border-radius: 48% 52% 52% 48% / 62% 38% 62% 38%;
+                transform: rotate(5deg);
+            }
+
+            .franja-color {
+                order: 3;
+                width: 100%;
+                padding: 30px 20px;
+                margin: -40px 0 25px 0; 
+                padding-top: 60px; 
+                z-index: 1;
+                box-sizing: border-box;
+            }
+
+            .franja-color h2 {
+                font-size: 1.6rem;
+                max-width: 100%;
+            }
+
+            .logos-area {
+                order: 4;
+                padding: 0;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="banner">
+        
+        <div class="contenido-izq">
+            <!-- TITULO -->
+            <h3 class="titulo-top" id="titulo-dinamico">Módulo 1</h3>
+
+            <!-- FRANJA DEL TEXTO-->
+            <div class="franja-color">
+                <h2 id="subtitulo-dinamico">Introducción al cambio climático</h2>
+            </div>
+
+            <!-- LOGOS -->
+            <div class="logos-area">
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <img id="logo-dinamico" class="logos-img" src="https://upload.wikimedia.org/wikipedia/commons/b/b7/Flag_of_Europe.svg" alt="Logo Institucional">
+                    <span style="font-weight:bold; color: var(--color-primario); font-size: 24px;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- BLOQUE IMAGEN Y DECORACIÓN -->
+        <div class="bloque-imagen">
+            <!-- Líneas Decorativas-->
+            <div class="linea-organica linea-1"></div>
+            <div class="linea-organica linea-2"></div>
+
+            <div class="imagen-container">
+                <img class="imagen-banner" id="imagen-dinamica" src="https://images.unsplash.com/photo-1533560904424-a8ae5e7a3cfa?q=80&w=2000&auto=format&fit=crop" alt="Imagen del curso">
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT PARA GESTIONAR PARÁMETROS URL -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Función para obtener parámetros
+            const obtenerParametro = (name) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            const colorParam = obtenerParametro('color');       
+            const imagenParam = obtenerParametro('imagen');     
+            const tituloParam = obtenerParametro('titulo');     
+            const subtituloParam = obtenerParametro('subtitulo'); 
+            const logoParam = obtenerParametro('logo'); // Agregado
+
+            // -- Color --
+            if (colorParam) {
+                let colorFinal = colorParam.startsWith('#') ? colorParam : '#' + colorParam;
+                document.documentElement.style.setProperty('--color-primario', colorFinal);
+            }
+
+            // -- Imagen Principal (URL) --
+            if (imagenParam) {
+                const imgElement = document.getElementById('imagen-dinamica');
+                if (imgElement) imgElement.src = imagenParam;
+            }
+
+            // -- Logo Institucional (URL) --
+            if (logoParam) {
+                const logoElement = document.getElementById('logo-dinamico');
+                if (logoElement) logoElement.src = logoParam;
+            }
+
+            // -- Título (Arriba) --
+            if (tituloParam) {
+                const tituloElement = document.getElementById('titulo-dinamico');
+                if (tituloElement) tituloElement.innerText = tituloParam;
+            }
+
+            // -- Subtítulo (Franja) --
+            if (subtituloParam) {
+                const subTituloElement = document.getElementById('subtitulo-dinamico');
+                if (subTituloElement) subTituloElement.innerText = subtituloParam;
+            }
+        });
+    </script>
+
+</body>
+</html>
