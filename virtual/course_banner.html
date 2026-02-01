@@ -53,7 +53,7 @@
             font-size: 2rem;
             font-weight: 800;
             margin: 0;
-            padding: 0 0 10px 50px;
+            padding: 0 0 10px 30px;
             text-transform: uppercase;
             line-height: 1;
         }
@@ -90,6 +90,10 @@
             width: auto;
             display: block;
             object-fit: contain;
+        }
+
+        .logo-mobile {
+            display: none;
         }
 
         .bloque-imagen {
@@ -183,9 +187,11 @@
 
             .titulo-top {
                 order: 1;
-                padding: 10px 20px;
+                padding: 10px 60px; 
                 font-size: 1.5rem;
                 margin-top: 0;
+                width: 100%;
+                box-sizing: border-box;
             }
 
             .bloque-imagen {
@@ -228,7 +234,7 @@
                 order: 3;
                 width: 100%;
                 padding: 20px 10px;
-                margin: -50px 0 10px 0;
+                margin: -60px 0 10px 0;
                 padding-top: 60px;
                 z-index: 1;
                 box-sizing: border-box;
@@ -242,12 +248,21 @@
             }
 
             .logos-area {
-                order: 4;
-                max-height:35px; 
+                order: unset; 
+                position: absolute;
+                top: 20px; 
+                left: 20px;
+                z-index: 30;
                 padding: 0;
-                display: flex;
-                justify-content: center;
+                margin: 0;
             }
+
+            .logos-img {
+                height: 35px;
+            }
+
+            .logo-desktop { display: none !important; }
+            .logo-mobile { display: block !important; }
         }
     </style>
 </head>
@@ -259,12 +274,14 @@
             <h3 class="titulo-top" id="titulo-dinamico">Módulo 1</h3>
 
             <div class="franja-color">
-                <h2 id="subtitulo-dinamico">Introducción al cambio climático</h2>
+                <h2 id="subtitulo-dinamico">Nombre de la unidad o modulo</h2>
             </div>
 
             <div class="logos-area">
                 <div id="logos-contenedor" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                    <img class="logos-img" src="https://www.uninunez.edu.co/images/logotxttealw.svg" alt="Logo Institucional">
+                    <img class="logos-img logo-desktop" src="media/logo_horizontal.png" alt="Logo Uninuñez">
+                    <img class="logos-img logo-mobile" src="media/logo.png" alt="Logo Uninuñez">
+                    
                     <span style="font-weight:bold; color: var(--color-primario); font-size: 24px;"></span>
                 </div>
             </div>
@@ -276,7 +293,7 @@
                 <div class="linea-organica linea-2"></div>
 
                 <div class="imagen-container">
-                    <img class="imagen-banner" id="imagen-dinamica" src="https://images.unsplash.com/photo-1533560904424-a8ae5e7a3cfa?q=80&w=2000&auto=format&fit=crop" alt="Imagen del curso">
+                    <img class="imagen-banner" id="imagen-dinamica" src="media/logo_negro.png" alt="Imagen del curso">
                 </div>
             </div>
         </div>
@@ -327,7 +344,7 @@
                     logos.forEach(url => {
                         const img = document.createElement('img');
                         img.src = url;
-                        img.className = 'logos-img';
+                        img.className = 'logos-img'; 
                         img.alt = 'Logo Institucional';
                         container.appendChild(img);
                     });
