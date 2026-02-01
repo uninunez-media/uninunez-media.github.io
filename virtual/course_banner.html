@@ -11,32 +11,30 @@
             --color-primario: #249A8C;
             --fondo-franja: var(--color-primario);
             --color-blanco: #ffffff;
-            --color-gris-fondo: #f9f9f9;
+            --color-gris-fondo: #ffffff;
         }
 
         body {
             margin: 0;
-            padding: 40px;
+            padding: 0; 
             font-family: 'Montserrat', sans-serif;
-            background-color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--color-blanco); 
+            display: block; 
+            overflow-x: hidden;
         }
 
         .banner {
             width: 100%;
-            max-width: 1200px;
+            max-width: 100%;
             background-color: var(--color-blanco);
             position: relative;
             display: flex;
             justify-content: space-between;
             align-items: center;
             min-height: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: none; 
             overflow: hidden;
-            border-radius: 12px;
+            border-radius: 0; 
             isolation: isolate;
         }
 
@@ -111,7 +109,7 @@
             position: relative;
             width: 340px;
             height: 300px;
-            margin-right: 20px;
+            margin-right: 40px; 
         }
 
         .imagen-container {
@@ -163,12 +161,18 @@
         }
 
         @media (max-width: 900px) {
+            body {
+                height: auto;
+                min-height: auto;
+                overflow-y: auto; 
+            }
+
             .banner {
                 flex-direction: column;
                 height: auto;
                 text-align: center;
                 padding-bottom: 30px;
-                padding-top: 0;
+                padding-top: 20px;
             }
 
             .contenido-izq {
@@ -179,9 +183,9 @@
 
             .titulo-top {
                 order: 1;
-                padding: 30px 20px 10px 20px;
+                padding: 10px 20px;
                 font-size: 1.5rem;
-                margin-top: 10px;
+                margin-top: 0;
             }
 
             .bloque-imagen {
