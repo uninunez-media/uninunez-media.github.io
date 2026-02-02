@@ -72,7 +72,6 @@
             font-weight: 700;
             color: var(--color-primario);
             margin-top: 5px;
-            text-transform: uppercase;
             letter-spacing: 0.5px;
             text-align: center;
             display: none; /* Oculto por defecto */
@@ -102,7 +101,6 @@
         .tipo-tema .texto-titulo {
             font-size: 1.6rem;
             font-weight: 800; 
-            text-transform: uppercase;
             border-bottom: 2px solid var(--color-primario); 
             padding-bottom: 5px;
         }
@@ -217,7 +215,7 @@
                 iconoEl.className = 'icono-fa fa-regular fa-bookmark';
             }
             if (numTemaParam && (!tipoParam || tipoParam === 'tema')) {
-                numTemaEl.innerText = `TEMA ${numTemaParam}`;
+                numTemaEl.innerText = `Tema ${numTemaParam}`;
                 numTemaEl.style.display = 'block';
             }
         });
