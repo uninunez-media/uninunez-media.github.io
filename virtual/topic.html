@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etiqueta Título UNINUÑEZ</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+        :root {
+            --color-primario: #249A8C; /* Color por defecto */
+            --color-texto: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px; 
+            font-family: 'Montserrat', sans-serif;
+            background-color: transparent; 
+            display: flex;
+            align-items: center;
+            overflow: hidden; 
+        }
+
+        .contenedor-etiqueta {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- ESTILOS DEL ICONO --- */
+        .contenedor-icono {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0; 
+            position: relative;
+        }
+
+        .icono-fa {
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .blob-fondo {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-primario);
+            opacity: 0.15; /* Transparencia elegante */
+            border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+            z-index: 1;
+            transition: border-radius 3s ease-in-out infinite alternate;
+        }
+
+        /* --- ESTILOS DEL TEXTO --- */
+        .texto-titulo {
+            font-family: 'Montserrat', sans-serif;
+            color: var(--color-primario);
+            margin: 0;
+            line-height: 1.2;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .tipo-tema .contenedor-icono {
+            width: 60px;
+            height: 60px;
+        }
+
+        .tipo-tema .icono-fa {
+            font-size: 28px; 
+            color: var(--color-primario); 
+        }
+        
+        .tipo-tema .texto-titulo {
+            font-size: 1.6rem;
+            font-weight: 800; 
+            text-transform: uppercase;
+            border-bottom: 2px solid var(--color-primario); 
+            padding-bottom: 5px;
+        }
+      
+        .tipo-recurso .contenedor-icono {
+            width: 40px;
+            height: 40px;
+        }
+
+        .tipo-recurso .blob-fondo {
+            display: none; 
+        }
+
+        .tipo-recurso .contenedor-icono {
+            background-color: var(--color-primario); /* Fondo sólido circular o cuadrado redondeado */
+            border-radius: 12px; 
+        }
+
+        .tipo-recurso .icono-fa {
+            font-size: 18px;
+            color: #ffffff; /* Icono blanco sobre fondo de color */
+        }
+
+        .tipo-recurso .texto-titulo {
+            font-size: 1.1rem;
+            font-weight: 600; 
+            color: #444; 
+            border-bottom: 1px solid #ddd; 
+            padding-bottom: 8px;
+        }
+
+        @keyframes morph {
+            0% { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; }
+            100% { border-radius: 70% 30% 42% 58% / 55% 55% 45% 45%; }
+        }
+        .tipo-tema .blob-fondo {
+            animation: morph 4s ease-in-out infinite alternate;
+        }
+
+        /* Responsive móvil */
+        @media (max-width: 600px) {
+            .tipo-tema .texto-titulo { font-size: 1.2rem; }
+            .tipo-tema .contenedor-icono { width: 50px; height: 50px; }
+            .tipo-tema .icono-fa { font-size: 24px; }
+            
+            .tipo-recurso .texto-titulo { font-size: 1rem; }
+            .tipo-recurso .contenedor-icono { width: 32px; height: 32px; }
+            .tipo-recurso .icono-fa { font-size: 16px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="main-container" class="contenedor-etiqueta tipo-tema">
+        
+        <div class="contenedor-icono">
+            <div class="blob-fondo"></div>
+            <!-- Elemento i para FontAwesome -->
+            <i id="icono-fa" class="icono-fa"></i>
+        </div>
+
+        <h2 id="texto-titulo" class="texto-titulo">Material de Estudio</h2>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const obtenerParametro = (name) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(name);
+            }
+
+            // Obtener parámetros
+            const textoParam = obtenerParametro('texto') || obtenerParametro('titulo');
+            const colorParam = obtenerParametro('color');
+            const iconoParam = obtenerParametro('icono');
+            const tipoParam = obtenerParametro('tipo'); // 'tema' o 'recurso'
+
+
+            const container = document.getElementById('main-container');
+            const tituloEl = document.getElementById('texto-titulo');
+            const iconoEl = document.getElementById('icono-fa');
+
+            if (tipoParam === 'recurso') {
+                container.classList.remove('tipo-tema');
+                container.classList.add('tipo-recurso');
+            } else {
+                container.classList.add('tipo-tema');
+                container.classList.remove('tipo-recurso');
+            }
+
+            if (colorParam) {
+                let colorBase = colorParam.startsWith('#') ? colorParam : '#' + colorParam;
+                document.documentElement.style.setProperty('--color-primario', colorBase);
+            }
+
+            if (textoParam) {
+                tituloEl.innerText = textoParam;
+            }
+
+            // Aplicar Icono FontAwesome
+            if (iconoParam) {
+                let nombreIcono = iconoParam.replace('fa-', '').replace('fa-solid ', '').replace('fa-regular ', '').trim();
+                
+                iconoEl.className = `icono-fa fa-solid fa-${nombreIcono}`;
+            } else {
+                iconoEl.className = 'icono-fa fa-regular fa-bookmark';
+            }
+        });
+    </script>
+</body>
+</html>
