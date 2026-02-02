@@ -32,6 +32,13 @@
         }
 
         /* --- ESTILOS DEL ICONO --- */
+        .grupo-icono {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
         .contenedor-icono {
             display: flex;
             justify-content: center;
@@ -59,6 +66,19 @@
         }
 
         /* --- ESTILOS DEL TEXTO --- */
+        .texto-num-tema {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.7rem; /* Fuente más pequeña */
+            font-weight: 700;
+            color: var(--color-primario);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            display: none; /* Oculto por defecto */
+            white-space: nowrap;
+        }
+        
         .texto-titulo {
             font-family: 'Montserrat', sans-serif;
             color: var(--color-primario);
@@ -139,10 +159,12 @@
 
     <div id="main-container" class="contenedor-etiqueta tipo-tema">
         
-        <div class="contenedor-icono">
-            <div class="blob-fondo"></div>
-            <!-- Elemento i para FontAwesome -->
-            <i id="icono-fa" class="icono-fa"></i>
+        <div class="grupo-icono">
+            <div class="contenedor-icono">
+                <div class="blob-fondo"></div>
+                <i id="icono-fa" class="icono-fa"></i>
+            </div>
+            <div id="texto-num-tema" class="texto-num-tema"></div>
         </div>
 
         <h2 id="texto-titulo" class="texto-titulo">Material de Estudio</h2>
@@ -161,11 +183,13 @@
             const colorParam = obtenerParametro('color');
             const iconoParam = obtenerParametro('icono');
             const tipoParam = obtenerParametro('tipo'); // 'tema' o 'recurso'
+            const numTemaParam = obtenerParametro('numtema'); 
 
 
             const container = document.getElementById('main-container');
             const tituloEl = document.getElementById('texto-titulo');
             const iconoEl = document.getElementById('icono-fa');
+            const numTemaEl = document.getElementById('texto-num-tema');
 
             if (tipoParam === 'recurso') {
                 container.classList.remove('tipo-tema');
@@ -191,6 +215,10 @@
                 iconoEl.className = `icono-fa fa-solid fa-${nombreIcono}`;
             } else {
                 iconoEl.className = 'icono-fa fa-regular fa-bookmark';
+            }
+            if (numTemaParam && (!tipoParam || tipoParam === 'tema')) {
+                numTemaEl.innerText = `TEMA ${numTemaParam}`;
+                numTemaEl.style.display = 'block';
             }
         });
     </script>
