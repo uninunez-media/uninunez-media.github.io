@@ -1,368 +1,346 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Plus, Trash2, GripHorizontal, Users } from 'lucide-react';
-import { initializeApp } from 'firebase/app';
-import { 
-  getAuth, 
-  signInAnonymously, 
-  signInWithCustomToken, 
-  onAuthStateChanged 
-} from 'firebase/auth';
-import { 
-  getFirestore, 
-  collection, 
-  onSnapshot, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  doc 
-} from 'firebase/firestore';
-
-// Configuración de colores para los post-its
-const POSTIT_COLORS = [
-  'bg-yellow-200 text-yellow-900 border-yellow-300',
-  'bg-pink-200 text-pink-900 border-pink-300',
-  'bg-blue-200 text-blue-900 border-blue-300',
-  'bg-green-200 text-green-900 border-green-300',
-  'bg-purple-200 text-purple-900 border-purple-300',
-  'bg-orange-200 text-orange-900 border-orange-300'
-];
-
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [db, setDb] = useState(null);
-  const [appId, setAppId] = useState('default-app-id');
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Estados para el arrastre (Drag & Drop)
-  const [draggingId, setDraggingId] = useState(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [localPositions, setLocalPositions] = useState({});
-
-  // Referencia al contenedor de la pizarra
-  const boardRef = useRef(null);
-
-  // Inicializar Firebase
-  useEffect(() => {
-    try {
-      const firebaseConfig = typeof __firebase_config !== 'undefined' 
-        ? JSON.parse(__firebase_config) 
-        : null;
-
-      if (!firebaseConfig) {
-        throw new Error("Configuración de Firebase no encontrada.");
-      }
-
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const firestore = getFirestore(app);
-      
-      setDb(firestore);
-      
-      const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-      setAppId(currentAppId);
-
-      // Autenticación requerida
-      const initAuth = async () => {
-        try {
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(auth);
-          }
-        } catch (err) {
-          console.error("Error de autenticación:", err);
-          setError("No se pudo conectar a la pizarra colaborativa.");
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero de Ideación</title>
+    <!-- Tailwind CSS para los estilos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Patrón de fondo del tablero */
+        .bg-dots {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
         }
-      };
-
-      initAuth();
-
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-      });
-
-      return () => unsubscribe();
-    } catch (err) {
-      console.error(err);
-      setError("Error al inicializar la base de datos.");
-      setLoading(false);
-    }
-  }, []);
-
-  // Escuchar cambios en Firestore
-  useEffect(() => {
-    if (!user || !db) return;
-
-    // Colección pública de la pizarra para que todos la vean
-    const notesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'board_notes');
-
-    const unsubscribe = onSnapshot(notesCollectionRef, (snapshot) => {
-      const fetchedNotes = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Ordenar por timestamp localmente (Regla de Firestore: no usar orderBy/where complejos)
-      fetchedNotes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-      
-      setNotes(fetchedNotes);
-      setLoading(false);
-    }, (err) => {
-      console.error("Error al obtener notas:", err);
-      setError("Error al cargar los post-its.");
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user, db, appId]);
-
-  // Manejadores de eventos Pointer para arrastrar notas libremente
-  useEffect(() => {
-    if (!draggingId || !user || !db) return;
-
-    const handlePointerMove = (e) => {
-      if (boardRef.current) {
-        const boardRect = boardRef.current.getBoundingClientRect();
-        
-        // Calcular nueva posición relativa al tablero
-        let newX = e.clientX - boardRect.left - dragOffset.x;
-        let newY = e.clientY - boardRect.top - dragOffset.y;
-
-        // Limitar dentro del tablero (con un margen aproximado para el post-it)
-        newX = Math.max(0, Math.min(newX, boardRect.width - 200));
-        newY = Math.max(0, Math.min(newY, boardRect.height - 200));
-
-        setLocalPositions(prev => ({
-          ...prev,
-          [draggingId]: { x: newX, y: newY }
-        }));
-      }
-    };
-
-    const handlePointerUp = async () => {
-      const finalPosition = localPositions[draggingId];
-      setDraggingId(null); // Detener el arrastre local inmediatamente
-      
-      if (finalPosition) {
-        try {
-          const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', draggingId);
-          await updateDoc(noteRef, {
-            x: finalPosition.x,
-            y: finalPosition.y
-          });
-        } catch (err) {
-          console.error("Error al guardar la nueva posición:", err);
+        /* Evita la selección de texto al arrastrar */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
         }
-      }
-    };
+    </style>
+</head>
+<body class="bg-[#f4f4f0] h-screen flex flex-col overflow-hidden font-sans text-gray-800">
 
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, [draggingId, dragOffset, localPositions, user, db, appId]);
-
-  // Agregar un nuevo Post-it
-  const addNote = async () => {
-    if (!user || !db) return;
-
-    // Generar posición inicial en cascada o aleatoria si está muy lleno
-    const randomX = Math.floor(Math.random() * 200) + 50;
-    const randomY = Math.floor(Math.random() * 200) + 50;
-    const randomColor = POSTIT_COLORS[Math.floor(Math.random() * POSTIT_COLORS.length)];
-
-    const newNote = {
-      text: '',
-      x: randomX,
-      y: randomY,
-      color: randomColor,
-      uid: user.uid,
-      createdAt: Date.now()
-    };
-
-    try {
-      const notesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'board_notes');
-      await addDoc(notesCollectionRef, newNote);
-    } catch (err) {
-      console.error("Error al crear la nota:", err);
-    }
-  };
-
-  // Actualizar el texto de un Post-it
-  const handleTextChange = async (id, newText) => {
-    if (!user || !db) return;
-    try {
-      const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', id);
-      await updateDoc(noteRef, { text: newText });
-    } catch (err) {
-      console.error("Error al actualizar texto:", err);
-    }
-  };
-
-  // Eliminar un Post-it
-  const deleteNote = async (id) => {
-    if (!user || !db) return;
-    try {
-      const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', id);
-      await deleteDoc(noteRef);
-    } catch (err) {
-      console.error("Error al eliminar nota:", err);
-    }
-  };
-
-  // Iniciar arrastre
-  const handlePointerDown = (e, id, noteElement) => {
-    // Solo permitir arrastre desde el área de la barra superior del post-it
-    if (e.target.tagName.toLowerCase() === 'textarea' || e.target.closest('button')) {
-      return;
-    }
-    
-    e.preventDefault(); // Prevenir selección de texto
-    const rect = noteElement.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const offsetY = e.clientY - rect.top;
-    
-    setDragOffset({ x: offsetX, y: offsetY });
-    setDraggingId(id);
-    setLocalPositions(prev => ({
-      ...prev,
-      [id]: { 
-        x: notes.find(n => n.id === id)?.x || 0, 
-        y: notes.find(n => n.id === id)?.y || 0 
-      }
-    }));
-  };
-
-  if (error) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50 p-4">
-        <div className="rounded-xl bg-red-50 p-6 text-center text-red-600 shadow-sm max-w-md">
-          <p className="font-semibold text-lg">{error}</p>
-          <p className="mt-2 text-sm">Asegúrate de ejecutar esta aplicación en un entorno con Firebase configurado.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading || !user) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#f4f4f0]">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mb-4"></div>
-        <p className="text-gray-600 font-medium">Cargando pizarra colaborativa...</p>
-      </div>
-    );
-  }
-
-  // Contar usuarios anónimos únicos basados en los autores de las notas
-  // (Nota: Esto no es usuarios activos en tiempo real, sino contribuidores, 
-  // ideal para el tope de ~30 personas indicado)
-  const uniqueContributors = new Set(notes.map(n => n.uid)).size;
-
-  return (
-    <div className="flex h-screen w-full flex-col bg-[#f4f4f0] overflow-hidden font-sans">
-      
-      {/* Barra de herramientas superior */}
-      <header className="relative z-20 flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-200">
+    <!-- Barra Superior -->
+    <header class="relative z-20 flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-200">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Tablero de Ideación</h1>
-          <p className="text-sm text-gray-500">Prototipado colaborativo (Anónimo)</p>
+            <h1 class="text-xl font-bold">Tablero de Ideación</h1>
+            <p class="text-sm text-gray-500">Prototipado colaborativo (Anónimo)</p>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
-            <Users size={16} />
-            <span>{uniqueContributors} {uniqueContributors === 1 ? 'autor' : 'autores'} en el tablero</span>
-          </div>
-          
-          <button
-            onClick={addNote}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 active:scale-95 shadow-sm"
-          >
-            <Plus size={18} />
-            <span>Añadir Post-it</span>
-          </button>
+        <div class="flex items-center gap-4">
+            <button id="add-btn" class="hidden flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 active:scale-95 shadow-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Añadir Post-it</span>
+            </button>
         </div>
-      </header>
+    </header>
 
-      {/* Área del tablero (Patrón de puntos) */}
-      <main 
-        ref={boardRef}
-        className="relative flex-1 overflow-auto touch-none"
-        style={{
-          backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
-          backgroundSize: '24px 24px'
-        }}
-      >
-        {notes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-gray-400 text-lg">El tablero está vacío. ¡Añade el primer Post-it!</p>
-          </div>
-        )}
+    <!-- Tablero de trabajo -->
+    <main id="board" class="relative flex-1 overflow-hidden touch-none bg-dots">
+        <!-- Pantalla de Carga Inicial -->
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-[#f4f4f0]/80 z-50">
+            <div class="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mb-4"></div>
+            <p class="font-medium text-gray-600">Conectando a la pizarra...</p>
+        </div>
 
-        {notes.map((note) => {
-          // Usar posición local si se está arrastrando, de lo contrario usar Firestore
-          const isDragging = draggingId === note.id;
-          const currentX = isDragging && localPositions[note.id] ? localPositions[note.id].x : note.x;
-          const currentY = isDragging && localPositions[note.id] ? localPositions[note.id].y : note.y;
+        <!-- Mensaje de Tablero Vacío -->
+        <div id="empty-state" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p class="text-gray-400 text-lg">El tablero está vacío. ¡Añade el primer Post-it!</p>
+        </div>
+    </main>
 
-          return (
-            <div
-              key={note.id}
-              id={`note-${note.id}`}
-              className={`absolute flex flex-col w-52 min-h-[200px] shadow-md transition-shadow duration-200 border-t-8 rounded-b-md
-                ${note.color} 
-                ${isDragging ? 'shadow-2xl z-50 scale-[1.02] opacity-90' : 'hover:shadow-lg z-10'}
-              `}
-              style={{
-                left: `${currentX}px`,
-                top: `${currentY}px`,
-                // Efecto de rotación sutil aleatoria basada en el ID para dar toque realista
-                transform: isDragging ? 'rotate(0deg)' : `rotate(${((note.createdAt % 5) - 2)}deg)`,
-              }}
-              onPointerDown={(e) => handlePointerDown(e, note.id, e.currentTarget)}
-            >
-              {/* Barra de arrastre del post-it */}
-              <div className="flex items-center justify-between px-2 py-1 cursor-grab active:cursor-grabbing border-b border-black/5">
-                <GripHorizontal size={16} className="text-black/30" />
-                
-                {/* Solo mostrar botón eliminar si el usuario actual lo creó o es anónimo colaborativo */}
-                {/* Se permite borrar a cualquiera para mayor fluidez en ideación grupal pequeña */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if(window.confirm('¿Seguro que deseas eliminar esta idea?')) {
-                      deleteNote(note.id);
-                    }
-                  }}
-                  className="p-1 text-black/40 hover:bg-black/10 hover:text-black/70 rounded transition-colors"
-                  title="Eliminar Post-it"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-
-              {/* Área de texto */}
-              <textarea
-                className="flex-1 w-full resize-none bg-transparent p-3 text-sm font-medium outline-none placeholder-black/30"
-                placeholder="Escribe una idea, estado o prototipo..."
-                defaultValue={note.text}
-                onBlur={(e) => handleTextChange(note.id, e.target.value)}
-                onPointerDown={(e) => e.stopPropagation()} // Prevenir arrastre al hacer clic en el texto
-              />
-              
-              <div className="px-3 py-2 text-[10px] text-right text-black/40 font-mono italic">
-                {new Date(note.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-          );
-        })}
-      </main>
-
+    <!-- Modal de Configuración (Solo visible si falta configurar Firebase en GitHub Pages) -->
+    <div id="setup-modal" class="hidden absolute inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full">
+            <h2 class="text-2xl font-bold text-red-600 mb-2">Falta configurar Firebase</h2>
+            <p class="text-gray-600 mb-4">Para que este tablero funcione en GitHub Pages, necesitas añadir tu propia configuración de Firebase en el archivo <code>index.html</code>.</p>
+            <ul class="list-disc pl-5 text-sm text-gray-700 space-y-2 mb-6">
+                <li>Ve a la consola de Firebase y crea un proyecto gratuito.</li>
+                <li>Activa la autenticación <b>Anónima</b>.</li>
+                <li>Crea una base de datos <b>Firestore</b>.</li>
+                <li>Reemplaza el objeto <code>firebaseConfig</code> en el código fuente de este archivo con tus credenciales.</li>
+            </ul>
+        </div>
     </div>
-  );
-}
+
+    <!-- Lógica de la Aplicación -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ======================================================================
+        // 1. CONFIGURACIÓN DE FIREBASE (¡Reemplaza esto para GitHub Pages!)
+        // ======================================================================
+        let miConfiguracionFirebase = {
+          apiKey: "AIzaSyDLhSolOlA4umbgrl8DxldgGz0llU5s02Q",
+          authDomain: "tablero-ingenio.firebaseapp.com",
+          projectId: "tablero-ingenio",
+          storageBucket: "tablero-ingenio.firebasestorage.app",
+          messagingSenderId: "372941148864",
+          appId: "1:372941148864:web:61e658b56faf8e9b495325",
+          measurementId: "G-Q5RYPPLPP6"
+        };
+
+        // --- Lógica interna para que funcione la vista previa en esta plataforma ---
+        const isCanvasEnv = typeof __firebase_config !== 'undefined';
+        if (isCanvasEnv) { miConfiguracionFirebase = JSON.parse(__firebase_config); }
+        // --------------------------------------------------------------------------
+
+        // Mostrar advertencia si el usuario subió el archivo sin cambiar las claves
+        if (!isCanvasEnv && miConfiguracionFirebase.apiKey === "AIzaSyDLhSolOlA4umbgrl8DxldgGz0llU5s02Q") {
+            document.getElementById('setup-modal').classList.remove('hidden');
+            document.getElementById('loading').classList.add('hidden');
+            throw new Error("Detenido: Configuración de Firebase requerida.");
+        }
+
+        // ======================================================================
+        // 2. INICIALIZACIÓN
+        // ======================================================================
+        const app = initializeApp(miConfiguracionFirebase);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+        
+        // Rutas de la base de datos (Adaptable para Canvas o GitHub Pages)
+        let collectionPath = 'board_notes';
+        if (isCanvasEnv) {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            collectionPath = `artifacts/${appId}/public/data/board_notes`;
+        }
+
+        const getNotesRef = () => collection(db, collectionPath);
+        const getNoteDoc = (id) => doc(db, collectionPath, id);
+
+        // Referencias del DOM
+        const board = document.getElementById('board');
+        const loading = document.getElementById('loading');
+        const addBtn = document.getElementById('add-btn');
+        const emptyState = document.getElementById('empty-state');
+
+        // Paleta de colores
+        const POSTIT_COLORS = [
+            'bg-yellow-200 text-yellow-900 border-yellow-300',
+            'bg-pink-200 text-pink-900 border-pink-300',
+            'bg-blue-200 text-blue-900 border-blue-300',
+            'bg-green-200 text-green-900 border-green-300',
+            'bg-purple-200 text-purple-900 border-purple-300'
+        ];
+
+        // Estado local
+        let draggingId = null;
+        let activeEditId = null;
+        let dragOffset = { x: 0, y: 0 };
+        let noteCount = 0;
+
+        // ======================================================================
+        // 3. AUTENTICACIÓN Y SINCRONIZACIÓN
+        // ======================================================================
+        const init = async () => {
+            try {
+                if (isCanvasEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth); // Inicio de sesión invisible para los usuarios
+                }
+            } catch (error) {
+                console.error("Error de autenticación:", error);
+                alert("Error al conectar. Revisa la configuración de Firebase.");
+            }
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                addBtn.classList.remove('hidden');
+                escucharNotas();
+            }
+        });
+
+        init();
+
+        // Escuchar cambios en tiempo real
+        function escucharNotas() {
+            onSnapshot(getNotesRef(), (snapshot) => {
+                loading.classList.add('hidden');
+                noteCount = snapshot.docs.length;
+                emptyState.style.display = noteCount === 0 ? 'flex' : 'none';
+
+                snapshot.docChanges().forEach((change) => {
+                    const noteData = { id: change.doc.id, ...change.doc.data() };
+
+                    if (change.type === 'added') {
+                        crearElementoPostIt(noteData);
+                    }
+                    if (change.type === 'modified') {
+                        actualizarElementoPostIt(noteData);
+                    }
+                    if (change.type === 'removed') {
+                        const el = document.getElementById(`note-${noteData.id}`);
+                        if (el) el.remove();
+                    }
+                });
+            }, (error) => {
+                console.error("Error escuchando base de datos:", error);
+            });
+        }
+
+        // ======================================================================
+        // 4. INTERFAZ Y DRAG & DROP
+        // ======================================================================
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        addBtn.addEventListener('click', async () => {
+            const randomX = Math.floor(Math.random() * 200) + 50;
+            const randomY = Math.floor(Math.random() * 200) + 50;
+            const color = POSTIT_COLORS[Math.floor(Math.random() * POSTIT_COLORS.length)];
+
+            await addDoc(getNotesRef(), {
+                text: '',
+                x: randomX,
+                y: randomY,
+                color: color,
+                uid: currentUser.uid,
+                createdAt: Date.now()
+            });
+        });
+
+        function crearElementoPostIt(note) {
+            const div = document.createElement('div');
+            div.id = `note-${note.id}`;
+            // Aplicar estilos base y rotación aleatoria
+            div.className = `absolute flex flex-col w-52 min-h-[200px] shadow-md transition-shadow duration-200 border-t-8 rounded-b-md ${note.color.split(' ')[0]} ${note.color.split(' ')[1]} ${note.color.split(' ')[2]} z-10`;
+            div.style.left = `${note.x}px`;
+            div.style.top = `${note.y}px`;
+            const rotation = (note.createdAt % 5) - 2;
+            div.style.transform = `rotate(${rotation}deg)`;
+
+            div.innerHTML = `
+                <div class="header no-select cursor-grab active:cursor-grabbing border-b border-black/5 flex items-center justify-between px-2 py-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-black/30"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                    <button class="delete-btn p-1 text-black/40 hover:bg-black/10 hover:text-black/70 rounded transition-colors" title="Eliminar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                </div>
+                <textarea class="flex-1 w-full resize-none bg-transparent p-3 text-sm font-medium outline-none placeholder-black/40" placeholder="Escribe una idea..."></textarea>
+                <div class="px-3 py-2 text-[10px] text-right text-black/40 font-mono italic">
+                    ${new Date(note.createdAt).toLocaleDateString()}
+                </div>
+            `;
+
+            // Eventos de arrastre
+            const header = div.querySelector('.header');
+            header.addEventListener('pointerdown', (e) => iniciarArrastre(e, note.id));
+
+            // Eventos de texto
+            const textarea = div.querySelector('textarea');
+            textarea.value = note.text || '';
+            
+            textarea.addEventListener('focus', () => { activeEditId = note.id; });
+            textarea.addEventListener('blur', () => { activeEditId = null; });
+            
+            // Guardar texto al dejar de escribir por medio segundo
+            textarea.addEventListener('input', debounce(async (e) => {
+                await updateDoc(getNoteDoc(note.id), { text: e.target.value });
+            }, 500));
+
+            // Evento eliminar
+            const delBtn = div.querySelector('.delete-btn');
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation(); // Evitar iniciar arrastre
+                if(confirm('¿Eliminar esta idea?')) {
+                    await deleteDoc(getNoteDoc(note.id));
+                }
+            });
+
+            board.appendChild(div);
+        }
+
+        function actualizarElementoPostIt(note) {
+            const el = document.getElementById(`note-${note.id}`);
+            if (!el) return;
+
+            // Actualizar posición SOLO si no lo estoy arrastrando yo ahora mismo
+            if (draggingId !== note.id) {
+                el.style.left = `${note.x}px`;
+                el.style.top = `${note.y}px`;
+            }
+
+            // Actualizar texto SOLO si no lo estoy editando yo ahora mismo
+            if (activeEditId !== note.id) {
+                const textarea = el.querySelector('textarea');
+                if (textarea.value !== note.text) {
+                    textarea.value = note.text || '';
+                }
+            }
+        }
+
+        // Lógica de movimiento (Pointer Events para ratón y táctil)
+        function iniciarArrastre(e, id) {
+            if (e.target.closest('button')) return; // No arrastrar si tocó el botón borrar
+            
+            draggingId = id;
+            const el = document.getElementById(`note-${id}`);
+            const rect = el.getBoundingClientRect();
+            const boardRect = board.getBoundingClientRect();
+            
+            dragOffset.x = e.clientX - rect.left;
+            dragOffset.y = e.clientY - rect.top;
+            
+            // Efecto visual de levantar el post-it
+            el.style.zIndex = 50;
+            el.classList.add('shadow-2xl', 'scale-[1.02]', 'opacity-90');
+            el.style.transform = 'rotate(0deg)'; // Enderezar al arrastrar
+        }
+
+        window.addEventListener('pointermove', (e) => {
+            if (!draggingId) return;
+            e.preventDefault(); // Prevenir scroll en móviles
+            
+            const el = document.getElementById(`note-${draggingId}`);
+            const boardRect = board.getBoundingClientRect();
+
+            let newX = e.clientX - boardRect.left - dragOffset.x;
+            let newY = e.clientY - boardRect.top - dragOffset.y;
+
+            el.style.left = `${newX}px`;
+            el.style.top = `${newY}px`;
+        });
+
+        window.addEventListener('pointerup', async () => {
+            if (!draggingId) return;
+            
+            const id = draggingId;
+            const el = document.getElementById(`note-${id}`);
+            draggingId = null; // Soltar localmente inmediato
+
+            // Quitar efecto visual
+            el.style.zIndex = 10;
+            el.classList.remove('shadow-2xl', 'scale-[1.02]', 'opacity-90');
+            
+            // Volver a rotar ligeramente usando el ID original de la base de datos
+            // (Para no perder el ángulo original, aunque idealmente debería guardarse en DB,
+            // usaremos un pseudo-aleatorio basado en la posición en el DOM o dejarlo recto)
+            el.style.transform = ''; 
+
+            // Guardar nueva posición en Firestore
+            const newX = parseFloat(el.style.left);
+            const newY = parseFloat(el.style.top);
+
+            try {
+                await updateDoc(getNoteDoc(id), { x: newX, y: newY });
+            } catch (err) {
+                console.error("Error al guardar posición:", err);
+            }
+        });
+
+    </script>
+</body>
+</html>
