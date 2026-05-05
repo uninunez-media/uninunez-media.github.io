@@ -84,11 +84,11 @@
 
         // --- Lógica interna para que funcione la vista previa en esta plataforma ---
         const isCanvasEnv = typeof __firebase_config !== 'undefined';
-        if (isCanvasEnv) { miConfiguracionFirebase = JSON.parse(__firebase_config); }
+        if (isCanvasEnv) { firebaseConfig = JSON.parse(__firebase_config); }
         // --------------------------------------------------------------------------
 
         // Mostrar advertencia si el usuario subió el archivo sin cambiar las claves
-        if (!isCanvasEnv && miConfiguracionFirebase.apiKey === "AIzaSyDLhSolOlA4umbgrl8DxldgGz0llU5s02Q") {
+        if (!isCanvasEnv && firebaseConfig.apiKey === "AIzaSyDLhSolOlA4umbgrl8DxldgGz0llU5s02Q") {
             document.getElementById('setup-modal').classList.remove('hidden');
             document.getElementById('loading').classList.add('hidden');
             throw new Error("Detenido: Configuración de Firebase requerida.");
@@ -97,7 +97,7 @@
         // ======================================================================
         // 2. INICIALIZACIÓN
         // ======================================================================
-        const app = initializeApp(miConfiguracionFirebase);
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
