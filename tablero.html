@@ -1,0 +1,368 @@
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Plus, Trash2, GripHorizontal, Users } from 'lucide-react';
+import { initializeApp } from 'firebase/app';
+import { 
+  getAuth, 
+  signInAnonymously, 
+  signInWithCustomToken, 
+  onAuthStateChanged 
+} from 'firebase/auth';
+import { 
+  getFirestore, 
+  collection, 
+  onSnapshot, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc 
+} from 'firebase/firestore';
+
+// Configuración de colores para los post-its
+const POSTIT_COLORS = [
+  'bg-yellow-200 text-yellow-900 border-yellow-300',
+  'bg-pink-200 text-pink-900 border-pink-300',
+  'bg-blue-200 text-blue-900 border-blue-300',
+  'bg-green-200 text-green-900 border-green-300',
+  'bg-purple-200 text-purple-900 border-purple-300',
+  'bg-orange-200 text-orange-900 border-orange-300'
+];
+
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [db, setDb] = useState(null);
+  const [appId, setAppId] = useState('default-app-id');
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Estados para el arrastre (Drag & Drop)
+  const [draggingId, setDraggingId] = useState(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [localPositions, setLocalPositions] = useState({});
+
+  // Referencia al contenedor de la pizarra
+  const boardRef = useRef(null);
+
+  // Inicializar Firebase
+  useEffect(() => {
+    try {
+      const firebaseConfig = typeof __firebase_config !== 'undefined' 
+        ? JSON.parse(__firebase_config) 
+        : null;
+
+      if (!firebaseConfig) {
+        throw new Error("Configuración de Firebase no encontrada.");
+      }
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const firestore = getFirestore(app);
+      
+      setDb(firestore);
+      
+      const currentAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+      setAppId(currentAppId);
+
+      // Autenticación requerida
+      const initAuth = async () => {
+        try {
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+        } catch (err) {
+          console.error("Error de autenticación:", err);
+          setError("No se pudo conectar a la pizarra colaborativa.");
+        }
+      };
+
+      initAuth();
+
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+      });
+
+      return () => unsubscribe();
+    } catch (err) {
+      console.error(err);
+      setError("Error al inicializar la base de datos.");
+      setLoading(false);
+    }
+  }, []);
+
+  // Escuchar cambios en Firestore
+  useEffect(() => {
+    if (!user || !db) return;
+
+    // Colección pública de la pizarra para que todos la vean
+    const notesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'board_notes');
+
+    const unsubscribe = onSnapshot(notesCollectionRef, (snapshot) => {
+      const fetchedNotes = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Ordenar por timestamp localmente (Regla de Firestore: no usar orderBy/where complejos)
+      fetchedNotes.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      
+      setNotes(fetchedNotes);
+      setLoading(false);
+    }, (err) => {
+      console.error("Error al obtener notas:", err);
+      setError("Error al cargar los post-its.");
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user, db, appId]);
+
+  // Manejadores de eventos Pointer para arrastrar notas libremente
+  useEffect(() => {
+    if (!draggingId || !user || !db) return;
+
+    const handlePointerMove = (e) => {
+      if (boardRef.current) {
+        const boardRect = boardRef.current.getBoundingClientRect();
+        
+        // Calcular nueva posición relativa al tablero
+        let newX = e.clientX - boardRect.left - dragOffset.x;
+        let newY = e.clientY - boardRect.top - dragOffset.y;
+
+        // Limitar dentro del tablero (con un margen aproximado para el post-it)
+        newX = Math.max(0, Math.min(newX, boardRect.width - 200));
+        newY = Math.max(0, Math.min(newY, boardRect.height - 200));
+
+        setLocalPositions(prev => ({
+          ...prev,
+          [draggingId]: { x: newX, y: newY }
+        }));
+      }
+    };
+
+    const handlePointerUp = async () => {
+      const finalPosition = localPositions[draggingId];
+      setDraggingId(null); // Detener el arrastre local inmediatamente
+      
+      if (finalPosition) {
+        try {
+          const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', draggingId);
+          await updateDoc(noteRef, {
+            x: finalPosition.x,
+            y: finalPosition.y
+          });
+        } catch (err) {
+          console.error("Error al guardar la nueva posición:", err);
+        }
+      }
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [draggingId, dragOffset, localPositions, user, db, appId]);
+
+  // Agregar un nuevo Post-it
+  const addNote = async () => {
+    if (!user || !db) return;
+
+    // Generar posición inicial en cascada o aleatoria si está muy lleno
+    const randomX = Math.floor(Math.random() * 200) + 50;
+    const randomY = Math.floor(Math.random() * 200) + 50;
+    const randomColor = POSTIT_COLORS[Math.floor(Math.random() * POSTIT_COLORS.length)];
+
+    const newNote = {
+      text: '',
+      x: randomX,
+      y: randomY,
+      color: randomColor,
+      uid: user.uid,
+      createdAt: Date.now()
+    };
+
+    try {
+      const notesCollectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'board_notes');
+      await addDoc(notesCollectionRef, newNote);
+    } catch (err) {
+      console.error("Error al crear la nota:", err);
+    }
+  };
+
+  // Actualizar el texto de un Post-it
+  const handleTextChange = async (id, newText) => {
+    if (!user || !db) return;
+    try {
+      const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', id);
+      await updateDoc(noteRef, { text: newText });
+    } catch (err) {
+      console.error("Error al actualizar texto:", err);
+    }
+  };
+
+  // Eliminar un Post-it
+  const deleteNote = async (id) => {
+    if (!user || !db) return;
+    try {
+      const noteRef = doc(db, 'artifacts', appId, 'public', 'data', 'board_notes', id);
+      await deleteDoc(noteRef);
+    } catch (err) {
+      console.error("Error al eliminar nota:", err);
+    }
+  };
+
+  // Iniciar arrastre
+  const handlePointerDown = (e, id, noteElement) => {
+    // Solo permitir arrastre desde el área de la barra superior del post-it
+    if (e.target.tagName.toLowerCase() === 'textarea' || e.target.closest('button')) {
+      return;
+    }
+    
+    e.preventDefault(); // Prevenir selección de texto
+    const rect = noteElement.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    
+    setDragOffset({ x: offsetX, y: offsetY });
+    setDraggingId(id);
+    setLocalPositions(prev => ({
+      ...prev,
+      [id]: { 
+        x: notes.find(n => n.id === id)?.x || 0, 
+        y: notes.find(n => n.id === id)?.y || 0 
+      }
+    }));
+  };
+
+  if (error) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-gray-50 p-4">
+        <div className="rounded-xl bg-red-50 p-6 text-center text-red-600 shadow-sm max-w-md">
+          <p className="font-semibold text-lg">{error}</p>
+          <p className="mt-2 text-sm">Asegúrate de ejecutar esta aplicación en un entorno con Firebase configurado.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-[#f4f4f0]">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mb-4"></div>
+        <p className="text-gray-600 font-medium">Cargando pizarra colaborativa...</p>
+      </div>
+    );
+  }
+
+  // Contar usuarios anónimos únicos basados en los autores de las notas
+  // (Nota: Esto no es usuarios activos en tiempo real, sino contribuidores, 
+  // ideal para el tope de ~30 personas indicado)
+  const uniqueContributors = new Set(notes.map(n => n.uid)).size;
+
+  return (
+    <div className="flex h-screen w-full flex-col bg-[#f4f4f0] overflow-hidden font-sans">
+      
+      {/* Barra de herramientas superior */}
+      <header className="relative z-20 flex items-center justify-between bg-white px-6 py-4 shadow-sm border-b border-gray-200">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">Tablero de Ideación</h1>
+          <p className="text-sm text-gray-500">Prototipado colaborativo (Anónimo)</p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-3 py-1.5 rounded-full">
+            <Users size={16} />
+            <span>{uniqueContributors} {uniqueContributors === 1 ? 'autor' : 'autores'} en el tablero</span>
+          </div>
+          
+          <button
+            onClick={addNote}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 active:scale-95 shadow-sm"
+          >
+            <Plus size={18} />
+            <span>Añadir Post-it</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Área del tablero (Patrón de puntos) */}
+      <main 
+        ref={boardRef}
+        className="relative flex-1 overflow-auto touch-none"
+        style={{
+          backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+          backgroundSize: '24px 24px'
+        }}
+      >
+        {notes.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p className="text-gray-400 text-lg">El tablero está vacío. ¡Añade el primer Post-it!</p>
+          </div>
+        )}
+
+        {notes.map((note) => {
+          // Usar posición local si se está arrastrando, de lo contrario usar Firestore
+          const isDragging = draggingId === note.id;
+          const currentX = isDragging && localPositions[note.id] ? localPositions[note.id].x : note.x;
+          const currentY = isDragging && localPositions[note.id] ? localPositions[note.id].y : note.y;
+
+          return (
+            <div
+              key={note.id}
+              id={`note-${note.id}`}
+              className={`absolute flex flex-col w-52 min-h-[200px] shadow-md transition-shadow duration-200 border-t-8 rounded-b-md
+                ${note.color} 
+                ${isDragging ? 'shadow-2xl z-50 scale-[1.02] opacity-90' : 'hover:shadow-lg z-10'}
+              `}
+              style={{
+                left: `${currentX}px`,
+                top: `${currentY}px`,
+                // Efecto de rotación sutil aleatoria basada en el ID para dar toque realista
+                transform: isDragging ? 'rotate(0deg)' : `rotate(${((note.createdAt % 5) - 2)}deg)`,
+              }}
+              onPointerDown={(e) => handlePointerDown(e, note.id, e.currentTarget)}
+            >
+              {/* Barra de arrastre del post-it */}
+              <div className="flex items-center justify-between px-2 py-1 cursor-grab active:cursor-grabbing border-b border-black/5">
+                <GripHorizontal size={16} className="text-black/30" />
+                
+                {/* Solo mostrar botón eliminar si el usuario actual lo creó o es anónimo colaborativo */}
+                {/* Se permite borrar a cualquiera para mayor fluidez en ideación grupal pequeña */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if(window.confirm('¿Seguro que deseas eliminar esta idea?')) {
+                      deleteNote(note.id);
+                    }
+                  }}
+                  className="p-1 text-black/40 hover:bg-black/10 hover:text-black/70 rounded transition-colors"
+                  title="Eliminar Post-it"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
+              {/* Área de texto */}
+              <textarea
+                className="flex-1 w-full resize-none bg-transparent p-3 text-sm font-medium outline-none placeholder-black/30"
+                placeholder="Escribe una idea, estado o prototipo..."
+                defaultValue={note.text}
+                onBlur={(e) => handleTextChange(note.id, e.target.value)}
+                onPointerDown={(e) => e.stopPropagation()} // Prevenir arrastre al hacer clic en el texto
+              />
+              
+              <div className="px-3 py-2 text-[10px] text-right text-black/40 font-mono italic">
+                {new Date(note.createdAt).toLocaleDateString()}
+              </div>
+            </div>
+          );
+        })}
+      </main>
+
+    </div>
+  );
+}
