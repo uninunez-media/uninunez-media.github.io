@@ -87,13 +87,6 @@
         if (isCanvasEnv) { firebaseConfig = JSON.parse(__firebase_config); }
         // --------------------------------------------------------------------------
 
-        // Mostrar advertencia si el usuario subió el archivo sin cambiar las claves
-        if (!isCanvasEnv && firebaseConfig.apiKey === "AIzaSyDLhSolOlA4umbgrl8DxldgGz0llU5s02Q") {
-            document.getElementById('setup-modal').classList.remove('hidden');
-            document.getElementById('loading').classList.add('hidden');
-            throw new Error("Detenido: Configuración de Firebase requerida.");
-        }
-
         // ======================================================================
         // 2. INICIALIZACIÓN
         // ======================================================================
